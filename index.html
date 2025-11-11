@@ -136,7 +136,7 @@
 </main>
 
 <script>
-/* 1. SEASONS → PRODUCTS */
+/* ---------- SEASONS → PRODUCTS ---------- */
 const seasonProducts = {
   winter: ["cambistat","reliant","alamo","moistureaide","trimtect"],
   spring: ["xytect2f","xytect10","transtect70","transtectInfusible","proxite","bifenamite2sc","abamectin015","scrimmage","diamid","junction","biorush","reliant","mectinite","lepitect"],
@@ -144,7 +144,7 @@ const seasonProducts = {
   fall: ["cambistat","xytect2f","alamo","trimtect","junction","moistureaide","reliant"]
 };
 
-/* 2. Cambistat table 4–47 (full) */
+/* ---------- CAMBISTAT TABLE (4–47") ---------- */
 const cambistatData = {
   "4":{"A":{"product":17,"water":185},"B":{"product":23,"water":250},"C":{"product":42,"water":460},"D":{"product":46,"water":510},"E":{"product":50,"water":550},"F":{"product":67,"water":735}},
   "5":{"A":{"product":21,"water":230},"B":{"product":28,"water":310},"C":{"product":52,"water":575},"D":{"product":57,"water":630},"E":{"product":63,"water":690},"F":{"product":83,"water":920}},
@@ -192,151 +192,30 @@ const cambistatData = {
   "47":{"A":{"product":294,"water":3230},"B":{"product":392,"water":4310},"C":{"product":490,"water":5385},"D":{"product":539,"water":5924},"E":{"product":588,"water":6463},"F":{"product":783,"water":8615}}
 };
 
-/* 3. Species → Category (full list) */
+/* ---------- SPECIES → CATEGORY (full) ---------- */
 const speciesToCategory = {
-  "Acacia": "F",
-  "Ailanthus": "D",
-  "Alder": "F",
-  "Anaqua": "E",
-  "Arborvitae": "F",
-  "Ash": "F",
-  "Aspen": "F",
-  "Australian Bottle": "C",
-  "Australian Pine": "A",
-  "Bald Cypress": "F",
-  "Banyan - Ficus": "F",
-  "Basswood, American": "A",
-  "Baytree": "E",
-  "Beech": "E",
-  "Birch": "F",
-  "Bischofia": "F",
-  "Black Gum / Tupelo": "B",
-  "Black Olive": "F",
-  "Bottlebrush": "F",
-  "Boxelder": "A",
-  "Buckeye": "D",
-  "Buttonwood": "F",
-  "California Pepper": "C",
-  "Camphor": "E",
-  "Catalpa": "E",
-  "Cedar – Deodora": "E",
-  "Cedar - all others": "F",
-  "Cherry - Black": "F",
-  "Cherry - Ornamental": "E",
-  "Cherry - Laurel": "E",
-  "Chinaberry": "E",
-  "Chinese Pistache": "E",
-  "Cottonwood*": "F",
-  "Crabapple": "F",
-  "Crape Myrtle": "B",
-  "Cryptomeria": "F",
-  "Cypress": "B",
-  "Ebony - Texas": "F",
-  "Elm - Cedar": "B",
-  "Elm - Chinese/Lacebark": "A",
-  "Elm - Siberian": "A",
-  "Elm - (all others)": "B",
-  "Eucalyptus": "F",
-  "Ficus": "F",
-  "Fir": "F",
-  "Ginkgo": "F",
-  "Gumbo Limbo": "F",
-  "Hackberry": "F",
-  "Hawthorn": "C",
-  "Hickory": "E",
-  "Holly - American": "E",
-  "Holly – Nellie Stevens": "E",
-  "Holly - Yaupon": "B",
-  "Horsechestnut": "C",
-  "Huisache": "E",
-  "Ironwood / Hornbeam": "D",
-  "Jacaranda": "F",
-  "Japanese Tree Lilac": "E",
-  "Juniper": "F",
-  "Katsura - Japanese": "A",
-  "Larch": "F",
-  "Laurel": "F",
-  "Leyland Cypress": "F",
-  "Linden": "A",
-  "Locust - Black": "F",
-  "Locust - Honey": "E",
-  "Lombardy Poplar": "F",
-  "Lysiloma": "F",
-  "Magnolia": "F",
-  "Mahogany": "F",
-  "Maple - Amur": "B",
-  "Maple - Bigleaf": "D",
-  "Maple - Japanese (caution)**": "A",
-  "Maple - Norway": "B",
-  "Maple - Red": "B",
-  "Maple - Silver": "D",
-  "Maple - Sugar": "B",
-  "Melaleuca": "F",
-  "Mesquite": "F",
-  "Mimosa": "E",
-  "Mountain Ash": "B",
-  "Mulberry": "F",
-  "Oak – Black": "E",
-  "Oak – Blackjack": "E",
-  "Oak – Bur": "D",
-  "Oak - Laurel": "F",
-  "Oak - Live (<10”)": "B",
-  "Oak - Live (>10”)": "E",
-  "Oak - Pin": "E",
-  "Oak - Post": "E",
-  "Oak - Red": "E",
-  "Oak - Sand Shinnery": "E",
-  "Oak - Scarlet": "E",
-  "Oak - Shumard": "E",
-  "Oak - Valley": "F",
-  "Oak - Water": "E",
-  "Oak - White": "D",
-  "Oak - Willow": "E",
-  "Olive - Black": "F",
-  "Olive - European": "E",
-  "Olive - Russian": "E",
-  "Orchid Tree - Hong Kong": "C",
-  "Osage Orange": "F",
-  "Palms": "F",
-  "Paloverde": "E",
-  "Paulownia": "E",
-  "Pear - Ornamental": "F",
-  "Pecan": "E",
-  "Persimmon": "C",
-  "Photinia": "E",
-  "Pines*": "F",
-  "Plum - Ornamental": "E",
-  "Poinciana": "F",
-  "Raintree - Golden": "F",
-  "Redcedar - Eastern": "F",
-  "Redwood": "F",
-  "Rosewood / Tipuana": "C",
-  "Russian Olive": "E",
-  "Saltcedar": "F",
-  "Sassafrass": "E",
-  "Sea Grape": "E",
-  "Soapberry": "E",
-  "Spruce*": "F",
-  "Sugarberry / So. Hackberry": "F",
-  "Sumac - African": "E",
-  "Sycamore": "F",
-  "Tabebuia": "F",
-  "Tallow - Chinese": "F",
-  "Tallowwood": "F",
-  "Tamarisk": "F",
-  "Tepeguaje": "E",
-  "Tulip / Yellow Poplar": "F",
-  "Tupelo / Black Gum": "B",
-  "Walnut": "E",
-  "Waxmyrtle - Pacific": "F",
-  "Willow": "F",
-  "Xylosma": "C",
-  "Yellow Poplar / Tulip": "F",
-  "Yew": "F",
-  "Zelkova": "B"
+  "Acacia": "F","Ailanthus": "D","Alder": "F","Anaqua": "E","Arborvitae": "F","Ash": "F","Aspen": "F","Australian Bottle": "C","Australian Pine": "A",
+  "Bald Cypress": "F","Banyan - Ficus": "F","Basswood, American": "A","Baytree": "E","Beech": "E","Birch": "F","Bischofia": "F","Black Gum / Tupelo": "B",
+  "Black Olive": "F","Bottlebrush": "F","Boxelder": "A","Buckeye": "D","Buttonwood": "F","California Pepper": "C","Camphor": "E","Catalpa": "E",
+  "Cedar – Deodora": "E","Cedar - all others": "F","Cherry - Black": "F","Cherry - Ornamental": "E","Cherry - Laurel": "E","Chinaberry": "E",
+  "Chinese Pistache": "E","Cottonwood*": "F","Crabapple": "F","Crape Myrtle": "B","Cryptomeria": "F","Cypress": "B","Ebony - Texas": "F","Elm - Cedar": "B",
+  "Elm - Chinese/Lacebark": "A","Elm - Siberian": "A","Elm - (all others)": "B","Eucalyptus": "F","Ficus": "F","Fir": "F","Ginkgo": "F","Gumbo Limbo": "F",
+  "Hackberry": "F","Hawthorn": "C","Hickory": "E","Holly - American": "E","Holly – Nellie Stevens": "E","Holly - Yaupon": "B","Horsechestnut": "C",
+  "Huisache": "E","Ironwood / Hornbeam": "D","Jacaranda": "F","Japanese Tree Lilac": "E","Juniper": "F","Katsura - Japanese": "A","Larch": "F","Laurel": "F",
+  "Leyland Cypress": "F","Linden": "A","Locust - Black": "F","Locust - Honey": "E","Lombardy Poplar": "F","Lysiloma": "F","Magnolia": "F","Mahogany": "F",
+  "Maple - Amur": "B","Maple - Bigleaf": "D","Maple - Japanese (caution)**": "A","Maple - Norway": "B","Maple - Red": "B","Maple - Silver": "D",
+  "Maple - Sugar": "B","Melaleuca": "F","Mesquite": "F","Mimosa": "E","Mountain Ash": "B","Mulberry": "F","Oak – Black": "E","Oak – Blackjack": "E",
+  "Oak – Bur": "D","Oak - Laurel": "F","Oak - Live (<10”)": "B","Oak - Live (>10”)": "E","Oak - Pin": "E","Oak - Post": "E","Oak - Red": "E",
+  "Oak - Sand Shinnery": "E","Oak - Scarlet": "E","Oak - Shumard": "E","Oak - Valley": "F","Oak - Water": "E","Oak - White": "D","Oak - Willow": "E",
+  "Olive - Black": "F","Olive - European": "E","Olive - Russian": "E","Orchid Tree - Hong Kong": "C","Osage Orange": "F","Palms": "F","Paloverde": "E",
+  "Paulownia": "E","Pear - Ornamental": "F","Pecan": "E","Persimmon": "C","Photinia": "E","Pines*": "F","Plum - Ornamental": "E","Poinciana": "F",
+  "Raintree - Golden": "F","Redcedar - Eastern": "F","Redwood": "F","Rosewood / Tipuana": "C","Russian Olive": "E","Saltcedar": "F","Sassafrass": "E",
+  "Sea Grape": "E","Soapberry": "E","Spruce*": "F","Sugarberry / So. Hackberry": "F","Sumac - African": "E","Sycamore": "F","Tabebuia": "F",
+  "Tallow - Chinese": "F","Tallowwood": "F","Tamarisk": "F","Tepeguaje": "E","Tulip / Yellow Poplar": "F","Tupelo / Black Gum": "B","Walnut": "E",
+  "Waxmyrtle - Pacific": "F","Willow": "F","Xylosma": "C","Yellow Poplar / Tulip": "F","Yew": "F","Zelkova": "B"
 };
 
-/* 4. Product config — now with your exact PDF names */
+/* ---------- PRODUCT CONFIG (with your PDF names) ---------- */
 const productConfig = {
   cambistat: {
     name: "Cambistat",
@@ -349,10 +228,8 @@ Season: Often fall–winter or when soil is workable.`,
 • Long-sleeved shirt and long pants
 • Chemical-resistant gloves
 • Shoes plus socks
-• Eye/face protection if splash hazard
-Do not get in eyes or on clothing.`
+• Eye/face protection if splash hazard`
   },
-
   xytect2f: {
     name: "Xytect 2F",
     showDBH: true,
@@ -371,7 +248,6 @@ Application: Inject or drench close to trunk for best uptake.`,
 • Chemical-resistant gloves
 • Shoes plus socks`
   },
-
   xytect10: {
     name: "Xytect 10% (injection)",
     showDBH: true,
@@ -388,7 +264,6 @@ Application: Inject or drench close to trunk for best uptake.`,
 • Chemical-resistant gloves
 • Eye protection`
   },
-
   transtect70: {
     name: "Transtect 70WSP",
     showDBH: true,
@@ -402,7 +277,6 @@ Application: Inject or drench close to trunk for best uptake.`,
 • Chemical-resistant gloves
 • Shoes plus socks`
   },
-
   transtectInfusible: {
     name: "Transtect Infusible",
     showDBH: true,
@@ -415,7 +289,6 @@ Application: Inject or drench close to trunk for best uptake.`,
 • Chemical-resistant gloves
 • Eye protection`
   },
-
   trimtect: {
     name: "Trimtect",
     showDBH: true,
@@ -428,7 +301,6 @@ Application: Inject or drench close to trunk for best uptake.`,
 • Chemical-resistant gloves
 • Shoes plus socks`
   },
-
   reliant: {
     name: "Reliant",
     showDBH: true,
@@ -444,7 +316,6 @@ Application: Inject or drench close to trunk for best uptake.`,
 • Chemical-resistant gloves
 • Eye protection`
   },
-
   proxite: {
     name: "Proxite",
     showSpray: true,
@@ -459,7 +330,6 @@ Application: Inject or drench close to trunk for best uptake.`,
 • Chemical-resistant gloves
 • Shoes plus socks`
   },
-
   myclotect: {
     name: "Myclotect",
     showSpray: true,
@@ -474,7 +344,6 @@ Application: Inject or drench close to trunk for best uptake.`,
 • Chemical-resistant gloves
 • Eye protection`
   },
-
   onmark: {
     name: "Onmark Herbicide",
     showSpray: true,
@@ -490,7 +359,6 @@ Application: Inject or drench close to trunk for best uptake.`,
 • Eye protection
 • Shoes plus socks`
   },
-
   bifenamite2sc: {
     name: "Bifenamite 2SC",
     showSpray: true,
@@ -505,7 +373,6 @@ Application: Inject or drench close to trunk for best uptake.`,
 • Chemical-resistant gloves
 • Shoes plus socks`
   },
-
   biorush: {
     name: "Biorush Plus 3-0-11",
     showSpray: true,
@@ -516,7 +383,6 @@ Application: Inject or drench close to trunk for best uptake.`,
 • Gloves when handling dry material
 • Shoes plus socks`
   },
-
   diamid: {
     name: "Diamid",
     showSpray: true,
@@ -530,7 +396,6 @@ Application: Inject or drench close to trunk for best uptake.`,
 • Chemical-resistant gloves
 • Shoes plus socks`
   },
-
   junction: {
     name: "Junction DF",
     showSpray: true,
@@ -542,7 +407,6 @@ Application: Inject or drench close to trunk for best uptake.`,
 • Eye protection
 • Shoes plus socks`
   },
-
   lepitect: {
     name: "Lepitect Infusible",
     showDBH: true,
@@ -555,7 +419,6 @@ Application: Inject or drench close to trunk for best uptake.`,
 • Chemical-resistant gloves
 • Eye/face protection`
   },
-
   mectinite: {
     name: "Mectinite",
     showDBH: true,
@@ -568,7 +431,6 @@ Application: Inject or drench close to trunk for best uptake.`,
 • Chemical-resistant gloves
 • Eye protection`
   },
-
   moistureaide: {
     name: "MoistureAide",
     showDBH: true,
@@ -581,7 +443,6 @@ Application: Inject or drench close to trunk for best uptake.`,
 • Chemical-resistant gloves
 • Shoes plus socks`
   },
-
   scrimmage: {
     name: "Scrimmage 03F",
     showSpray: true,
@@ -596,7 +457,6 @@ Application: Inject or drench close to trunk for best uptake.`,
 • Chemical-resistant gloves
 • Shoes plus socks`
   },
-
   abamectin015: {
     name: "Abamectin 0.15 Select",
     showSpray: true,
@@ -611,7 +471,6 @@ Application: Inject or drench close to trunk for best uptake.`,
 • Chemical-resistant gloves
 • Shoes plus socks`
   },
-
   alamo: {
     name: "Alamo (propiconazole)",
     showDBH: true,
@@ -632,25 +491,26 @@ Application: Inject or drench close to trunk for best uptake.`,
   }
 };
 
-/* helpers */
+/* ---------- helpers ---------- */
 function showSection(id, show){ document.getElementById(id).style.display = show ? "" : "none"; }
 function formatMl(v){ return Math.round(v); }
 function gallonsToMl(g){ return g*3785.41; }
 function lbToGrams(lb){ return lb*453.592; }
 
-/* populate species */
+/* populate species once */
 function populateSpecies(){
   const sel=document.getElementById("species");
   sel.innerHTML="";
-  Object.keys(speciesToCategory).sort().forEach(n=>{
+  Object.keys(speciesToCategory).sort().forEach(name=>{
     const opt=document.createElement("option");
-    opt.value=n; opt.textContent=n;
+    opt.value=name;
+    opt.textContent=name;
     sel.appendChild(opt);
   });
 }
 populateSpecies();
 
-/* season changed */
+/* season change → load products */
 document.getElementById("season").addEventListener("change", ()=>{
   const season = document.getElementById("season").value;
   const prodSel = document.getElementById("product");
@@ -675,7 +535,7 @@ document.getElementById("season").addEventListener("change", ()=>{
   updateProductUI();
 });
 
-/* product changed */
+/* product change */
 document.getElementById("product").addEventListener("change", updateProductUI);
 
 function updateProductUI(){
@@ -683,18 +543,19 @@ function updateProductUI(){
   if (!product) return;
   const cfg = productConfig[product];
 
+  // fill use / ppe
   document.getElementById("useText").textContent = cfg.use || "See label.";
   document.getElementById("ppeText").textContent = cfg.ppe || "See label.";
 
-  // LABEL TAB
+  // label tab
   const labelBox = document.getElementById("labelBox");
   if (cfg.labelUrl) {
     labelBox.innerHTML = `This product has a label.<br><a href="${cfg.labelUrl}" target="_blank" rel="noopener noreferrer">📄 View label PDF</a>`;
   } else {
-    labelBox.textContent = "Label not available in this project yet. Upload PDF to /labels and add its path here.";
+    labelBox.textContent = "Label not available in this project yet.";
   }
 
-  // reset calc UI
+  // hide all calc inputs first
   showSection("cambistatInputs", false);
   showSection("dbhInputs", false);
   showSection("methodWrap", false);
@@ -702,33 +563,42 @@ function updateProductUI(){
   showSection("sprayInputs", false);
   showSection("results", false);
 
+  // cambistat special
   if (cfg.showCambistat) {
     showSection("cambistatInputs", true);
     calcCambistat();
     return;
   }
 
+  // DBH input
   if (cfg.showDBH) showSection("dbhInputs", true);
+
+  // methods
   if (cfg.showMethods) {
     const mSel = document.getElementById("method");
     mSel.innerHTML = "";
-    cfg.methods.forEach(m=>{
+    (cfg.methods || []).forEach(m=>{
       const o=document.createElement("option");
       o.value=m; o.textContent=m;
       mSel.appendChild(o);
     });
     showSection("methodWrap", true);
   }
+
+  // pests/rates
   if (cfg.pests) {
     const pSel = document.getElementById("pest");
-    pSel.innerHTML="";
-    cfg.pests.forEach(p=>{
+    pSel.innerHTML = "";
+    (cfg.pests || []).forEach(p=>{
       const o=document.createElement("option");
-      o.value=p.id; o.textContent=p.label;
+      o.value=p.id;
+      o.textContent=p.label;
       pSel.appendChild(o);
     });
     showSection("pestWrap", true);
   }
+
+  // spray inputs
   if (cfg.showSpray) {
     showSection("sprayInputs", true);
   }
@@ -736,7 +606,7 @@ function updateProductUI(){
   computeCurrentProduct();
 }
 
-/* tabs */
+/* tabs behavior */
 document.querySelectorAll(".tab-btn").forEach(btn=>{
   btn.addEventListener("click",()=>{
     document.querySelectorAll(".tab-btn").forEach(b=>b.classList.remove("active"));
@@ -746,7 +616,7 @@ document.querySelectorAll(".tab-btn").forEach(btn=>{
   });
 });
 
-/* Cambistat calc */
+/* cambistat calc */
 function calcCambistat(){
   const species = document.getElementById("species").value;
   const dbh = parseInt(document.getElementById("dbhCambistat").value, 10);
@@ -779,7 +649,7 @@ function calcCambistat(){
   totalText.textContent = `Total: ${cell.product + cell.water} mL`;
 }
 
-/* main calculator for other products */
+/* main calculator */
 function computeCurrentProduct(){
   const product = document.getElementById("product").value;
   const cfg = productConfig[product];
@@ -790,17 +660,16 @@ function computeCurrentProduct(){
   const totalText = document.getElementById("totalText");
   showSection("results", true);
 
-  // Cambistat handled elsewhere
+  // Cambistat is separate
   if (cfg.showCambistat) return;
 
-  // 1) Xytect soil products
+  // Xytect-style
   if (product === "xytect2f" || product === "xytect10") {
     const dbh = parseFloat(document.getElementById("dbh").value || "0");
     const pestId = document.getElementById("pest").value;
     const method = document.getElementById("method").value;
     const chosen = (cfg.pests || [])[0];
     const rateObj = (cfg.pests || []).find(p=>p.id===pestId) || chosen;
-
     const mlPerIn = (rateObj.rateFlOz || 0.15) * 29.5735;
     const productMl = mlPerIn * dbh;
     let waterMl;
@@ -808,19 +677,19 @@ function computeCurrentProduct(){
     if (method === "Soil injection") {
       const gals = Math.max(1, dbh * 1);
       waterMl = gallonsToMl(gals);
-      waterText.textContent = `Water: ${formatMl(waterMl)} mL (≈ ${gals.toFixed(1)} gal)`;
+      waterText.textContent = `Water: ${Math.round(waterMl)} mL (≈ ${gals.toFixed(1)} gal)`;
     } else {
       const gals = 2;
       waterMl = gallonsToMl(gals);
-      waterText.textContent = `Water: ${formatMl(waterMl)} mL (example 2 gal drench)`;
+      waterText.textContent = `Water: ${Math.round(waterMl)} mL (example 2 gal drench)`;
     }
 
-    doseText.textContent = `Product: ${formatMl(productMl)} mL ${cfg.name} at ${rateObj.rateFlOz || 0.15} fl oz/in × ${dbh} in`;
-    totalText.textContent = `Total mix: ${formatMl(productMl + waterMl)} mL`;
+    doseText.textContent = `Product: ${Math.round(productMl)} mL ${cfg.name} at ${(rateObj.rateFlOz || 0.15)} fl oz/in × ${dbh} in`;
+    totalText.textContent = `Total mix: ${Math.round(productMl + waterMl)} mL`;
     return;
   }
 
-  // 2) Alamo / Reliant (ml per inch, dilute to 1 L per inch)
+  // Alamo / Reliant
   if (product === "alamo" || product === "reliant") {
     const dbh = parseFloat(document.getElementById("dbh").value || "0");
     const pestId = document.getElementById("pest").value;
@@ -828,13 +697,13 @@ function computeCurrentProduct(){
     const p = (cfg.pests || []).find(x=>x.id===pestId) || chosen;
     const productMl = p.rateMlPerIn * dbh;
     const waterMl = p.waterLPerIn * dbh * 1000;
-    doseText.textContent = `Product: ${formatMl(productMl)} mL ${cfg.name} (${p.rateMlPerIn} mL/in × ${dbh} in)`;
-    waterText.textContent = `Water: up to ${formatMl(waterMl)} mL (≈ ${(waterMl/1000).toFixed(1)} L)`;
+    doseText.textContent = `Product: ${Math.round(productMl)} mL ${cfg.name} (${p.rateMlPerIn} mL/in × ${dbh} in)`;
+    waterText.textContent = `Water: up to ${Math.round(waterMl)} mL (≈ ${(waterMl/1000).toFixed(1)} L)`;
     totalText.textContent = `Apply by flare-root injection per label.`;
     return;
   }
 
-  // 3) Transtect 70 WSP
+  // Transtect 70
   if (product === "transtect70") {
     const dbh = parseFloat(document.getElementById("dbh").value || "0");
     const method = document.getElementById("method").value;
@@ -846,13 +715,13 @@ function computeCurrentProduct(){
     } else {
       const gals = Math.max(2, dbh * 0.25);
       const waterMl = gallonsToMl(gals);
-      waterText.textContent = `Water: ${formatMl(waterMl)} mL (≈ ${gals.toFixed(1)} gal)`;
+      waterText.textContent = `Water: ${Math.round(waterMl)} mL (≈ ${gals.toFixed(1)} gal)`;
       totalText.textContent = `Apply around root zone / injection sites.`;
     }
     return;
   }
 
-  // 4) Injection insecticides
+  // injection insecticides
   if (product === "transtectInfusible" || product === "lepitect" || product === "mectinite") {
     const dbh = parseFloat(document.getElementById("dbh").value || "0");
     let perIn;
@@ -860,54 +729,51 @@ function computeCurrentProduct(){
     if (product === "lepitect")           perIn = dbh < 12 ? 4 : (dbh < 24 ? 6 : 8);
     if (product === "mectinite")          perIn = dbh < 12 ? 4 : (dbh < 24 ? 8 : 10);
     const productMl = perIn * dbh;
-    doseText.textContent = `Product: ${formatMl(productMl)} mL ${cfg.name} (${perIn} mL/in × ${dbh} in).`;
+    doseText.textContent = `Product: ${Math.round(productMl)} mL ${cfg.name} (${perIn} mL/in × ${dbh} in).`;
     waterText.textContent = `Water: per injection device / label (enough to deliver).`;
     totalText.textContent = `Inject evenly around root flare.`;
     return;
   }
 
-  // 5) **Trimtect** — this is the one you wanted
+  // Trimtect — your added one
   if (product === "trimtect") {
     const dbh = parseFloat(document.getElementById("dbh").value || "0");
     const method = document.getElementById("method").value;
-    // placeholder rate — swap for your exact label rate if different
-    const productMl = 3 * dbh; // 3 mL per inch
+    const productMl = 3 * dbh; // placeholder rate
     let waterMl;
-
     if (method === "Soil injection") {
       const gals = Math.max(1.5, dbh * 0.25);
       waterMl = gallonsToMl(gals);
-      waterText.textContent = `Water: ${formatMl(waterMl)} mL (≈ ${gals.toFixed(1)} gal)`;
+      waterText.textContent = `Water: ${Math.round(waterMl)} mL (≈ ${gals.toFixed(1)} gal)`;
     } else {
       const gals = 1.5;
       waterMl = gallonsToMl(gals);
-      waterText.textContent = `Water: ${formatMl(waterMl)} mL (example drench volume)`;
+      waterText.textContent = `Water: ${Math.round(waterMl)} mL (example drench volume)`;
     }
-
-    doseText.textContent = `Product: ${formatMl(productMl)} mL Trimtect (3 mL/in × ${dbh} in)`;
-    totalText.textContent = `Total: ${formatMl(productMl + waterMl)} mL`;
+    doseText.textContent = `Product: ${Math.round(productMl)} mL Trimtect (3 mL/in × ${dbh} in)`;
+    totalText.textContent = `Total: ${Math.round(productMl + waterMl)} mL`;
     return;
   }
 
-  // 6) Spray products
+  // spray products
   if (cfg.showSpray) {
     const sprayGal = parseFloat(document.getElementById("sprayVol").value || "0");
     const pestId = document.getElementById("pest").value;
     const chosen = (cfg.pests || [])[0];
     const p = (cfg.pests || []).find(x=>x.id===pestId) || chosen;
 
-    // Onmark
+    // Onmark special
     if (product === "onmark") {
       const pct = p ? p.percent : 1;
       const totalMl = gallonsToMl(sprayGal);
       const productMl = totalMl * (pct / 100);
-      doseText.textContent = `Product: ${formatMl(productMl)} mL Onmark for ${sprayGal} gal at ${pct}% solution.`;
+      doseText.textContent = `Product: ${Math.round(productMl)} mL Onmark for ${sprayGal} gal at ${pct}% solution.`;
       waterText.textContent = `Water: to ${sprayGal} gal.`;
       totalText.textContent = `Spray to wet target weeds.`;
       return;
     }
 
-    // Biorush
+    // Biorush special
     if (product === "biorush") {
       const lb = (1/50) * sprayGal;
       const grams = lbToGrams(lb);
@@ -917,7 +783,7 @@ function computeCurrentProduct(){
       return;
     }
 
-    // Junction
+    // Junction special
     if (product === "junction") {
       const lbPer100 = 1.5;
       const neededLb = lbPer100 * (sprayGal / 100);
@@ -928,17 +794,17 @@ function computeCurrentProduct(){
       return;
     }
 
-    // everything else spray: fl oz / 100 gal
+    // default spray
     const rate = (p && p.rateFlOzPer100) ? p.rateFlOzPer100 : 8;
     const neededFlOz = rate * (sprayGal / 100);
     const productMl = neededFlOz * 29.5735;
-    doseText.textContent = `Product: ${formatMl(productMl)} mL ${cfg.name} for ${sprayGal} gal at ${rate} fl oz/100 gal.`;
+    doseText.textContent = `Product: ${Math.round(productMl)} mL ${cfg.name} for ${sprayGal} gal at ${rate} fl oz/100 gal.`;
     waterText.textContent = `Water: to ${sprayGal} gal total spray.`;
     totalText.textContent = `Apply with good coverage.`;
     return;
   }
 
-  // 7) MoistureAide
+  // MoistureAide special
   if (product === "moistureaide") {
     const dbh = parseFloat(document.getElementById("dbh").value || "0");
     const method = document.getElementById("method").value;
@@ -947,21 +813,32 @@ function computeCurrentProduct(){
     if (method === "Soil injection") {
       const gals = 5 * dbh;
       const waterMl = gallonsToMl(gals);
-      doseText.textContent = `Product: ${formatMl(productMl)} mL MoistureAide (${flOzPerIn} fl oz/in × ${dbh} in).`;
-      waterText.textContent = `Water: ${formatMl(waterMl)} mL (≈ ${gals.toFixed(1)} gal)`;
-      totalText.textContent = `Total: ${formatMl(productMl + waterMl)} mL`;
+      doseText.textContent = `Product: ${Math.round(productMl)} mL MoistureAide (${flOzPerIn} fl oz/in × ${dbh} in).`;
+      waterText.textContent = `Water: ${Math.round(waterMl)} mL (≈ ${gals.toFixed(1)} gal)`;
+      totalText.textContent = `Total: ${Math.round(productMl + waterMl)} mL.`;
     } else {
       const gals = 2;
       const waterMl = gallonsToMl(gals);
-      doseText.textContent = `Product: ${formatMl(productMl)} mL MoistureAide.`;
-      waterText.textContent = `Water: ${formatMl(waterMl)} mL (example drench).`;
-      totalText.textContent = `Total: ${formatMl(productMl + waterMl)} mL`;
+      doseText.textContent = `Product: ${Math.round(productMl)} mL MoistureAide.`;
+      waterText.textContent = `Water: ${Math.round(waterMl)} mL (example drench).`;
+      totalText.textContent = `Total: ${Math.round(productMl + waterMl)} mL.`;
     }
     return;
   }
 
-  // 8) default — only products with no math land here
+  // default fallback
   doseText.textContent = "Calculator for this product not fully defined here.";
   waterText.textContent = "";
   totalText.textContent = "";
 }
+
+/* listeners for live calc */
+document.getElementById("species").addEventListener("change", calcCambistat);
+document.getElementById("dbhCambistat").addEventListener("input", calcCambistat);
+document.getElementById("dbh").addEventListener("input", computeCurrentProduct);
+document.getElementById("method").addEventListener("change", computeCurrentProduct);
+document.getElementById("pest").addEventListener("change", computeCurrentProduct);
+document.getElementById("sprayVol").addEventListener("input", computeCurrentProduct);
+</script>
+</body>
+</html>
