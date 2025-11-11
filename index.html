@@ -934,6 +934,32 @@ function computeCurrentProduct(){
     }
     return;
   }
+  // Trimtect (simple example rate)
+  if (product === "trimtect") {
+    const dbh = parseFloat(document.getElementById("dbh").value || "0");
+    const method = document.getElementById("method").value;
+    // example: 3 mL per inch DBH
+    const productMl = 3 * dbh;
+    let waterMl;
+    if (method === "Soil injection") {
+      // more water for injection
+      const gals = Math.max(1.5, dbh * 0.25);
+      waterMl = gallonsToMl(gals);
+      document.getElementById("waterText").textContent =
+        `Water: ${formatMl(waterMl)} mL (≈ ${gals.toFixed(1)} gal)`;
+    } else {
+      // simple drench
+      const gals = 1.5;
+      waterMl = gallonsToMl(gals);
+      document.getElementById("waterText").textContent =
+        `Water: ${formatMl(waterMl)} mL (example drench volume)`;
+    }
+    document.getElementById("doseText").textContent =
+      `Product: ${formatMl(productMl)} mL Trimtect (3 mL/in × ${dbh} in)`;
+    document.getElementById("totalText").textContent =
+      `Total: ${formatMl(productMl + waterMl)} mL`;
+    return;
+  }
 
   // default
   doseText.textContent = "Calculator for this product not fully defined here.";
