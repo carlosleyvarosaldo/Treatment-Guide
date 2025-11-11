@@ -5,100 +5,28 @@
   <title>Seasonal Tree Product Dose Calculator</title>
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <style>
-    body {
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      background: #f5f5f5;
-      margin: 0;
-    }
-    header {
-      background: #0d6efd;
-      color: #fff;
-      padding: 1rem 1.5rem;
-    }
-    main {
-      max-width: 1150px;
-      margin: 0 auto;
-      padding: 1.5rem;
-    }
-    .card {
-      background: #fff;
-      border-radius: 12px;
-      padding: 1.25rem 1.5rem 1.5rem;
-      margin-bottom: 1.5rem;
-      box-shadow: 0 10px 35px rgba(0,0,0,.05);
-    }
-    label {
-      font-weight: 600;
-      display: block;
-      margin-bottom: .25rem;
-    }
-    select, input {
-      width: 100%;
-      padding: .45rem .55rem;
-      border-radius: 8px;
-      border: 1px solid #ddd;
-      margin-bottom: .75rem;
-      background: #fff;
-      font-size: .9rem;
-    }
-    .row {
-      display: flex;
-      gap: 1rem;
-      flex-wrap: wrap;
-    }
-    .col-4 { flex: 1 1 220px; }
-    .col-6 { flex: 1 1 320px; }
-    .col-12 { flex: 1 1 100%; }
-    .tabs {
-      display: flex;
-      gap: .5rem;
-      margin-top: 1rem;
-      margin-bottom: 1rem;
-    }
-    .tab-btn {
-      border: 1px solid #ddd;
-      background: #fff;
-      padding: .4rem .75rem;
-      border-radius: 999px;
-      font-size: .8rem;
-      cursor: pointer;
-    }
-    .tab-btn.active {
-      background: #0d6efd;
-      color: #fff;
-      border-color: #0d6efd;
-    }
-    .panel {
-      display: none;
-    }
-    .panel.active {
-      display: block;
-    }
-    .results {
-      background: #0d6efd0d;
-      border: 1px solid #0d6efd1f;
-      border-radius: 10px;
-      padding: 1rem 1.25rem;
-      margin-top: 1rem;
-    }
-    small {
-      font-size: .7rem;
-      color: #555;
-      display: block;
-      margin-top: -.2rem;
-      margin-bottom: .5rem;
-    }
-    .disclaimer {
-      font-size: .65rem;
-      color: #888;
-      margin-top: .65rem;
-    }
+    body { font-family: system-ui, sans-serif; background:#f5f5f5; margin:0; }
+    header { background:#0d6efd; color:#fff; padding:1rem 1.5rem; }
+    main { max-width:1150px; margin:0 auto; padding:1.5rem; }
+    .card { background:#fff; border-radius:12px; padding:1.25rem 1.5rem 1.5rem; box-shadow:0 10px 35px rgba(0,0,0,.05); }
+    label { font-weight:600; display:block; margin-bottom:.25rem; }
+    select,input { width:100%; padding:.45rem .55rem; border-radius:8px; border:1px solid #ddd; margin-bottom:.75rem; background:#fff; }
+    .row { display:flex; gap:1rem; flex-wrap:wrap; }
+    .col-4 { flex:1 1 220px; }
+    .col-6 { flex:1 1 320px; }
+    .tabs { display:flex; gap:.5rem; margin-top:1rem; margin-bottom:1rem; }
+    .tab-btn { border:1px solid #ddd; background:#fff; padding:.4rem .75rem; border-radius:999px; font-size:.8rem; cursor:pointer; }
+    .tab-btn.active { background:#0d6efd; color:#fff; border-color:#0d6efd; }
+    .panel { display:none; }
+    .panel.active { display:block; }
+    .results { background:#0d6efd0d; border:1px solid #0d6efd1f; border-radius:10px; padding:1rem 1.25rem; margin-top:1rem; }
+    small { font-size:.7rem; color:#555; display:block; margin-top:-.2rem; margin-bottom:.5rem; }
+    .disclaimer { font-size:.65rem; color:#888; margin-top:.65rem; }
+    #useText, #ppeText { white-space:pre-line; }
   </style>
 </head>
 <body>
-<header>
-  <h1>Seasonal Tree Product Dose Calculator</h1>
-</header>
+<header><h1>Seasonal Tree Product Dose Calculator</h1></header>
 <main>
   <div class="card">
     <div class="row">
@@ -120,7 +48,6 @@
       </div>
     </div>
 
-    <!-- tabs -->
     <div class="tabs" id="tabs" style="display:none">
       <button class="tab-btn active" data-tab="use">Use</button>
       <button class="tab-btn" data-tab="ppe">PPE & Application</button>
@@ -191,7 +118,7 @@
         <p id="waterText"></p>
         <p id="totalText"></p>
         <p class="disclaimer">
-          Always follow the actual product label. This tool just does the math and shows example dilutions.
+          Always follow the current specimen label. This tool summarizes rates and PPE and is not a substitute for the label.
         </p>
       </div>
     </div>
@@ -199,313 +126,469 @@
 </main>
 
 <script>
-/* =========== SEASON → PRODUCTS =========== */
-/* you can edit this to match your actual program */
+/* 1. SEASONS → PRODUCTS (multi-season) */
 const seasonProducts = {
-  winter: ["cambistat", "reliant", "moistureaide", "alamo"],
-  spring: ["xytect2f", "xytect10", "transtect70", "proxite", "bifenamite2sc", "abamectin015", "scrimmage"],
-  summer: ["myclotect", "transtectInfusible", "lepitect", "mectinite", "diamid", "junction", "biorush"],
-  fall: ["trimtect", "onmark", "xytect2f", "alamo"]  // fall injections / growth regulator
+  winter: [
+    "cambistat","reliant","alamo","moistureaide","trimtect"
+  ],
+  spring: [
+    "xytect2f","xytect10","transtect70","transtectInfusible","proxite","bifenamite2sc","abamectin015","scrimmage","diamid","junction","biorush","reliant","mectinite","lepitect"
+  ],
+  summer: [
+    "myclotect","transtect70","transtectInfusible","lepitect","mectinite","moistureaide","onmark","scrimmage","bifenamite2sc","proxite"
+  ],
+  fall: [
+    "cambistat","xytect2f","alamo","trimtect","junction","moistureaide","reliant"
+  ]
 };
 
-/* =========== CAMBISTAT TABLE (4–47) =========== */
-/* direct paste of the table you gave me */
+/* 2. Full Cambistat DBH table 4–47 (from your table) */
 const cambistatData = {
-  "4": {"A":{"product":17,"water":185},"B":{"product":23,"water":250},"C":{"product":42,"water":460},"D":{"product":46,"water":510},"E":{"product":50,"water":550},"F":{"product":67,"water":735}},
-  "5": {"A":{"product":21,"water":230},"B":{"product":28,"water":310},"C":{"product":52,"water":575},"D":{"product":57,"water":630},"E":{"product":63,"water":690},"F":{"product":83,"water":920}},
-  "6": {"A":{"product":25,"water":275},"B":{"product":33,"water":370},"C":{"product":63,"water":690},"D":{"product":69,"water":760},"E":{"product":75,"water":825},"F":{"product":100,"water":1100}},
-  "7": {"A":{"product":44,"water":480},"B":{"product":58,"water":645},"C":{"product":73,"water":805},"D":{"product":80,"water":885},"E":{"product":88,"water":965},"F":{"product":117,"water":1285}},
-  "8": {"A":{"product":50,"water":550},"B":{"product":67,"water":735},"C":{"product":83,"water":920},"D":{"product":92,"water":1000},"E":{"product":100,"water":1100},"F":{"product":133,"water":1470}},
-  "9": {"A":{"product":56,"water":620},"B":{"product":75,"water":825},"C":{"product":94,"water":1030},"D":{"product":103,"water":1135},"E":{"product":113,"water":1240},"F":{"product":150,"water":1650}},
-  "10": {"A":{"product":63,"water":690},"B":{"product":83,"water":920},"C":{"product":104,"water":1145},"D":{"product":115,"water":1260},"E":{"product":125,"water":1375},"F":{"product":167,"water":1835}},
-  "11": {"A":{"product":69,"water":755},"B":{"product":92,"water":1010},"C":{"product":115,"water":1260},"D":{"product":126,"water":1390},"E":{"product":138,"water":1515},"F":{"product":183,"water":2020}},
-  "12": {"A":{"product":75,"water":825},"B":{"product":100,"water":1100},"C":{"product":125,"water":1375},"D":{"product":138,"water":1515},"E":{"product":150,"water":1650},"F":{"product":200,"water":2200}},
-  "13": {"A":{"product":81,"water":900},"B":{"product":108,"water":1190},"C":{"product":135,"water":1490},"D":{"product":149,"water":1640},"E":{"product":163,"water":1790},"F":{"product":217,"water":2385}},
-  "14": {"A":{"product":88,"water":965},"B":{"product":117,"water":1285},"C":{"product":146,"water":1605},"D":{"product":160,"water":1765},"E":{"product":175,"water":1925},"F":{"product":233,"water":2570}},
-  "15": {"A":{"product":94,"water":1030},"B":{"product":125,"water":1375},"C":{"product":156,"water":1720},"D":{"product":172,"water":1895},"E":{"product":188,"water":2065},"F":{"product":250,"water":2750}},
-  "16": {"A":{"product":100,"water":1100},"B":{"product":133,"water":1470},"C":{"product":167,"water":1835},"D":{"product":183,"water":2020},"E":{"product":200,"water":2200},"F":{"product":267,"water":2935}},
-  "17": {"A":{"product":106,"water":1170},"B":{"product":142,"water":1560},"C":{"product":177,"water":1950},"D":{"product":195,"water":2145},"E":{"product":213,"water":2340},"F":{"product":283,"water":3120}},
-  "18": {"A":{"product":113,"water":1240},"B":{"product":150,"water":1650},"C":{"product":188,"water":2065},"D":{"product":206,"water":2270},"E":{"product":225,"water":2475},"F":{"product":300,"water":3300}},
-  "19": {"A":{"product":119,"water":1310},"B":{"product":158,"water":1745},"C":{"product":198,"water":2177},"D":{"product":218,"water":2395},"E":{"product":238,"water":2615},"F":{"product":317,"water":3485}},
-  "20": {"A":{"product":125,"water":1375},"B":{"product":167,"water":1835},"C":{"product":208,"water":2290},"D":{"product":229,"water":2520},"E":{"product":250,"water":2750},"F":{"product":333,"water":3670}},
-  "21": {"A":{"product":131,"water":1445},"B":{"product":175,"water":1925},"C":{"product":219,"water":2410},"D":{"product":241,"water":2650},"E":{"product":263,"water":2890},"F":{"product":350,"water":3850}},
-  "22": {"A":{"product":138,"water":1515},"B":{"product":183,"water":2020},"C":{"product":229,"water":2520},"D":{"product":252,"water":2775},"E":{"product":275,"water":3025},"F":{"product":367,"water":4035}},
-  "23": {"A":{"product":144,"water":1580},"B":{"product":192,"water":2110},"C":{"product":240,"water":2635},"D":{"product":264,"water":2900},"E":{"product":288,"water":3165},"F":{"product":383,"water":4220}},
-  "24": {"A":{"product":150,"water":1650},"B":{"product":200,"water":2200},"C":{"product":250,"water":2750},"D":{"product":275,"water":3025},"E":{"product":300,"water":3300},"F":{"product":400,"water":4400}},
-  "25": {"A":{"product":156,"water":1720},"B":{"product":208,"water":2295},"C":{"product":260,"water":2865},"D":{"product":287,"water":3150},"E":{"product":313,"water":3440},"F":{"product":417,"water":4585}},
-  "26": {"A":{"product":162,"water":1787},"B":{"product":217,"water":2385},"C":{"product":271,"water":2980},"D":{"product":298,"water":3277},"E":{"product":325,"water":3575},"F":{"product":433,"water":4765}},
-  "27": {"A":{"product":169,"water":1855},"B":{"product":225,"water":2475},"C":{"product":281,"water":3095},"D":{"product":310,"water":3400},"E":{"product":338,"water":3715},"F":{"product":450,"water":4950}},
-  "28": {"A":{"product":175,"water":1925},"B":{"product":233,"water":2570},"C":{"product":292,"water":3210},"D":{"product":321,"water":3530},"E":{"product":350,"water":3850},"F":{"product":467,"water":5135}},
-  "29": {"A":{"product":181,"water":1995},"B":{"product":242,"water":2660},"C":{"product":302,"water":3320},"D":{"product":332,"water":3660},"E":{"product":363,"water":3990},"F":{"product":483,"water":5320}},
-  "30": {"A":{"product":188,"water":2060},"B":{"product":250,"water":2750},"C":{"product":313,"water":3440},"D":{"product":344,"water":3780},"E":{"product":375,"water":4125},"F":{"product":500,"water":5500}},
-  "31": {"A":{"product":194,"water":2130},"B":{"product":258,"water":2840},"C":{"product":323,"water":3550},"D":{"product":355,"water":3910},"E":{"product":388,"water":4265},"F":{"product":517,"water":5685}},
-  "32": {"A":{"product":200,"water":2200},"B":{"product":267,"water":2930},"C":{"product":333,"water":3670},"D":{"product":367,"water":4035},"E":{"product":400,"water":4400},"F":{"product":533,"water":5870}},
-  "33": {"A":{"product":206,"water":2270},"B":{"product":275,"water":3025},"C":{"product":345,"water":3780},"D":{"product":378,"water":4160},"E":{"product":413,"water":4540},"F":{"product":550,"water":6050}},
-  "34": {"A":{"product":213,"water":2340},"B":{"product":283,"water":3120},"C":{"product":354,"water":3900},"D":{"product":390,"water":4285},"E":{"product":425,"water":4675},"F":{"product":567,"water":6235}},
-  "35": {"A":{"product":219,"water":2405},"B":{"product":292,"water":3210},"C":{"product":365,"water":4010},"D":{"product":401,"water":4410},"E":{"product":438,"water":4810},"F":{"product":583,"water":6415}},
-  "36": {"A":{"product":225,"water":2475},"B":{"product":300,"water":3300},"C":{"product":375,"water":4125},"D":{"product":413,"water":4540},"E":{"product":450,"water":4950},"F":{"product":600,"water":6600}},
-  "37": {"A":{"product":231,"water":2545},"B":{"product":308,"water":3390},"C":{"product":386,"water":4240},"D":{"product":424,"water":4664},"E":{"product":463,"water":5090},"F":{"product":617,"water":6780}},
-  "38": {"A":{"product":238,"water":2610},"B":{"product":317,"water":3480},"C":{"product":396,"water":4355},"D":{"product":435,"water":4790},"E":{"product":475,"water":5225},"F":{"product":633,"water":6970}},
-  "39": {"A":{"product":244,"water":2680},"B":{"product":325,"water":3575},"C":{"product":406,"water":4470},"D":{"product":447,"water":4915},"E":{"product":488,"water":5365},"F":{"product":650,"water":7150}},
-  "40": {"A":{"product":250,"water":2750},"B":{"product":333,"water":3670},"C":{"product":417,"water":4585},"D":{"product":458,"water":5040},"E":{"product":500,"water":5500},"F":{"product":667,"water":7335}},
-  "41": {"A":{"product":256,"water":2820},"B":{"product":342,"water":3760},"C":{"product":427,"water":4700},"D":{"product":470,"water":5168},"E":{"product":513,"water":5640},"F":{"product":683,"water":7520}},
-  "42": {"A":{"product":263,"water":2890},"B":{"product":350,"water":3850},"C":{"product":438,"water":4815},"D":{"product":481,"water":5295},"E":{"product":525,"water":5775},"F":{"product":700,"water":7700}},
-  "43": {"A":{"product":269,"water":2955},"B":{"product":358,"water":3940},"C":{"product":448,"water":4930},"D":{"product":493,"water":5420},"E":{"product":538,"water":5915},"F":{"product":717,"water":7885}},
-  "44": {"A":{"product":275,"water":3025},"B":{"product":367,"water":4035},"C":{"product":458,"water":5040},"D":{"product":504,"water":5545},"E":{"product":550,"water":6050},"F":{"product":733,"water":8065}},
-  "45": {"A":{"product":281,"water":3095},"B":{"product":375,"water":4125},"C":{"product":469,"water":5155},"D":{"product":516,"water":5670},"E":{"product":563,"water":6190},"F":{"product":750,"water":8250}},
-  "46": {"A":{"product":288,"water":3160},"B":{"product":383,"water":4220},"C":{"product":479,"water":5270},"D":{"product":527,"water":5800},"E":{"product":575,"water":6325},"F":{"product":767,"water":8435}},
-  "47": {"A":{"product":294,"water":3230},"B":{"product":392,"water":4310},"C":{"product":490,"water":5385},"D":{"product":539,"water":5924},"E":{"product":588,"water":6463},"F":{"product":783,"water":8615}}
+"4":{"A":{"product":17,"water":185},"B":{"product":23,"water":250},"C":{"product":42,"water":460},"D":{"product":46,"water":510},"E":{"product":50,"water":550},"F":{"product":67,"water":735}},
+"5":{"A":{"product":21,"water":230},"B":{"product":28,"water":310},"C":{"product":52,"water":575},"D":{"product":57,"water":630},"E":{"product":63,"water":690},"F":{"product":83,"water":920}},
+"6":{"A":{"product":25,"water":275},"B":{"product":33,"water":370},"C":{"product":63,"water":690},"D":{"product":69,"water":760},"E":{"product":75,"water":825},"F":{"product":100,"water":1100}},
+"7":{"A":{"product":44,"water":480},"B":{"product":58,"water":645},"C":{"product":73,"water":805},"D":{"product":80,"water":885},"E":{"product":88,"water":965},"F":{"product":117,"water":1285}},
+"8":{"A":{"product":50,"water":550},"B":{"product":67,"water":735},"C":{"product":83,"water":920},"D":{"product":92,"water":1000},"E":{"product":100,"water":1100},"F":{"product":133,"water":1470}},
+"9":{"A":{"product":56,"water":620},"B":{"product":75,"water":825},"C":{"product":94,"water":1030},"D":{"product":103,"water":1135},"E":{"product":113,"water":1240},"F":{"product":150,"water":1650}},
+"10":{"A":{"product":63,"water":690},"B":{"product":83,"water":920},"C":{"product":104,"water":1145},"D":{"product":115,"water":1260},"E":{"product":125,"water":1375},"F":{"product":167,"water":1835}},
+"11":{"A":{"product":69,"water":755},"B":{"product":92,"water":1010},"C":{"product":115,"water":1260},"D":{"product":126,"water":1390},"E":{"product":138,"water":1515},"F":{"product":183,"water":2020}},
+"12":{"A":{"product":75,"water":825},"B":{"product":100,"water":1100},"C":{"product":125,"water":1375},"D":{"product":138,"water":1515},"E":{"product":150,"water":1650},"F":{"product":200,"water":2200}},
+"13":{"A":{"product":81,"water":900},"B":{"product":108,"water":1190},"C":{"product":135,"water":1490},"D":{"product":149,"water":1640},"E":{"product":163,"water":1790},"F":{"product":217,"water":2385}},
+"14":{"A":{"product":88,"water":965},"B":{"product":117,"water":1285},"C":{"product":146,"water":1605},"D":{"product":160,"water":1765},"E":{"product":175,"water":1925},"F":{"product":233,"water":2570}},
+"15":{"A":{"product":94,"water":1030},"B":{"product":125,"water":1375},"C":{"product":156,"water":1720},"D":{"product":172,"water":1895},"E":{"product":188,"water":2065},"F":{"product":250,"water":2750}},
+"16":{"A":{"product":100,"water":1100},"B":{"product":133,"water":1470},"C":{"product":167,"water":1835},"D":{"product":183,"water":2020},"E":{"product":200,"water":2200},"F":{"product":267,"water":2935}},
+"17":{"A":{"product":106,"water":1170},"B":{"product":142,"water":1560},"C":{"product":177,"water":1950},"D":{"product":195,"water":2145},"E":{"product":213,"water":2340},"F":{"product":283,"water":3120}},
+"18":{"A":{"product":113,"water":1240},"B":{"product":150,"water":1650},"C":{"product":188,"water":2065},"D":{"product":206,"water":2270},"E":{"product":225,"water":2475},"F":{"product":300,"water":3300}},
+"19":{"A":{"product":119,"water":1310},"B":{"product":158,"water":1745},"C":{"product":198,"water":2177},"D":{"product":218,"water":2395},"E":{"product":238,"water":2615},"F":{"product":317,"water":3485}},
+"20":{"A":{"product":125,"water":1375},"B":{"product":167,"water":1835},"C":{"product":208,"water":2290},"D":{"product":229,"water":2520},"E":{"product":250,"water":2750},"F":{"product":333,"water":3670}},
+"21":{"A":{"product":131,"water":1445},"B":{"product":175,"water":1925},"C":{"product":219,"water":2410},"D":{"product":241,"water":2650},"E":{"product":263,"water":2890},"F":{"product":350,"water":3850}},
+"22":{"A":{"product":138,"water":1515},"B":{"product":183,"water":2020},"C":{"product":229,"water":2520},"D":{"product":252,"water":2775},"E":{"product":275,"water":3025},"F":{"product":367,"water":4035}},
+"23":{"A":{"product":144,"water":1580},"B":{"product":192,"water":2110},"C":{"product":240,"water":2635},"D":{"product":264,"water":2900},"E":{"product":288,"water":3165},"F":{"product":383,"water":4220}},
+"24":{"A":{"product":150,"water":1650},"B":{"product":200,"water":2200},"C":{"product":250,"water":2750},"D":{"product":275,"water":3025},"E":{"product":300,"water":3300},"F":{"product":400,"water":4400}},
+"25":{"A":{"product":156,"water":1720},"B":{"product":208,"water":2295},"C":{"product":260,"water":2865},"D":{"product":287,"water":3150},"E":{"product":313,"water":3440},"F":{"product":417,"water":4585}},
+"26":{"A":{"product":162,"water":1787},"B":{"product":217,"water":2385},"C":{"product":271,"water":2980},"D":{"product":298,"water":3277},"E":{"product":325,"water":3575},"F":{"product":433,"water":4765}},
+"27":{"A":{"product":169,"water":1855},"B":{"product":225,"water":2475},"C":{"product":281,"water":3095},"D":{"product":310,"water":3400},"E":{"product":338,"water":3715},"F":{"product":450,"water":4950}},
+"28":{"A":{"product":175,"water":1925},"B":{"product":233,"water":2570},"C":{"product":292,"water":3210},"D":{"product":321,"water":3530},"E":{"product":350,"water":3850},"F":{"product":467,"water":5135}},
+"29":{"A":{"product":181,"water":1995},"B":{"product":242,"water":2660},"C":{"product":302,"water":3320},"D":{"product":332,"water":3660},"E":{"product":363,"water":3990},"F":{"product":483,"water":5320}},
+"30":{"A":{"product":188,"water":2060},"B":{"product":250,"water":2750},"C":{"product":313,"water":3440},"D":{"product":344,"water":3780},"E":{"product":375,"water":4125},"F":{"product":500,"water":5500}},
+"31":{"A":{"product":194,"water":2130},"B":{"product":258,"water":2840},"C":{"product":323,"water":3550},"D":{"product":355,"water":3910},"E":{"product":388,"water":4265},"F":{"product":517,"water":5685}},
+"32":{"A":{"product":200,"water":2200},"B":{"product":267,"water":2930},"C":{"product":333,"water":3670},"D":{"product":367,"water":4035},"E":{"product":400,"water":4400},"F":{"product":533,"water":5870}},
+"33":{"A":{"product":206,"water":2270},"B":{"product":275,"water":3025},"C":{"product":345,"water":3780},"D":{"product":378,"water":4160},"E":{"product":413,"water":4540},"F":{"product":550,"water":6050}},
+"34":{"A":{"product":213,"water":2340},"B":{"product":283,"water":3120},"C":{"product":354,"water":3900},"D":{"product":390,"water":4285},"E":{"product":425,"water":4675},"F":{"product":567,"water":6235}},
+"35":{"A":{"product":219,"water":2405},"B":{"product":292,"water":3210},"C":{"product":365,"water":4010},"D":{"product":401,"water":4410},"E":{"product":438,"water":4810},"F":{"product":583,"water":6415}},
+"36":{"A":{"product":225,"water":2475},"B":{"product":300,"water":3300},"C":{"product":375,"water":4125},"D":{"product":413,"water":4540},"E":{"product":450,"water":4950},"F":{"product":600,"water":6600}},
+"37":{"A":{"product":231,"water":2545},"B":{"product":308,"water":3390},"C":{"product":386,"water":4240},"D":{"product":424,"water":4664},"E":{"product":463,"water":5090},"F":{"product":617,"water":6780}},
+"38":{"A":{"product":238,"water":2610},"B":{"product":317,"water":3480},"C":{"product":396,"water":4355},"D":{"product":435,"water":4790},"E":{"product":475,"water":5225},"F":{"product":633,"water":6970}},
+"39":{"A":{"product":244,"water":2680},"B":{"product":325,"water":3575},"C":{"product":406,"water":4470},"D":{"product":447,"water":4915},"E":{"product":488,"water":5365},"F":{"product":650,"water":7150}},
+"40":{"A":{"product":250,"water":2750},"B":{"product":333,"water":3670},"C":{"product":417,"water":4585},"D":{"product":458,"water":5040},"E":{"product":500,"water":5500},"F":{"product":667,"water":7335}},
+"41":{"A":{"product":256,"water":2820},"B":{"product":342,"water":3760},"C":{"product":427,"water":4700},"D":{"product":470,"water":5168},"E":{"product":513,"water":5640},"F":{"product":683,"water":7520}},
+"42":{"A":{"product":263,"water":2890},"B":{"product":350,"water":3850},"C":{"product":438,"water":4815},"D":{"product":481,"water":5295},"E":{"product":525,"water":5775},"F":{"product":700,"water":7700}},
+"43":{"A":{"product":269,"water":2955},"B":{"product":358,"water":3940},"C":{"product":448,"water":4930},"D":{"product":493,"water":5420},"E":{"product":538,"water":5915},"F":{"product":717,"water":7885}},
+"44":{"A":{"product":275,"water":3025},"B":{"product":367,"water":4035},"C":{"product":458,"water":5040},"D":{"product":504,"water":5545},"E":{"product":550,"water":6050},"F":{"product":733,"water":8065}},
+"45":{"A":{"product":281,"water":3095},"B":{"product":375,"water":4125},"C":{"product":469,"water":5155},"D":{"product":516,"water":5670},"E":{"product":563,"water":6190},"F":{"product":750,"water":8250}},
+"46":{"A":{"product":288,"water":3160},"B":{"product":383,"water":4220},"C":{"product":479,"water":5270},"D":{"product":527,"water":5800},"E":{"product":575,"water":6325},"F":{"product":767,"water":8435}},
+"47":{"A":{"product":294,"water":3230},"B":{"product":392,"water":4310},"C":{"product":490,"water":5385},"D":{"product":539,"water":5924},"E":{"product":588,"water":6463},"F":{"product":783,"water":8615}}
 };
 
-/* =========== SPECIES → CATEGORY (shortened: put your full mapping here) =========== */
-/* for brevity, I’ll show a few — paste your full mapping from earlier */
+/* 3. Species → Category (short version; you can paste full list here) */
 const speciesToCategory = {
-  "Acacia":"F","Ailanthus":"D","Alder":"F","Anaqua":"E","Arborvitae":"F","Ash":"F","Aspen":"F",
-  "Australian Bottle":"C","Australian Pine":"A","Bald Cypress":"F","Banyan - Ficus":"F","Basswood, American":"A",
-  "Baytree":"E","Beech":"E","Birch":"F","Bischofia":"F","Black Gum / Tupelo":"B","Black Olive":"F","Bottlebrush":"F",
-  "Boxelder":"A","Buckeye":"D","Buttonwood":"F","California Pepper":"C","Camphor":"E","Catalpa":"E","Cedar – Deodora":"E",
-  "Cedar - all others":"F","Cherry - Black":"F","Cherry - Ornamental":"E","Cherry - Laurel":"E","Chinaberry":"E",
-  "Chinese Pistache":"E","Cottonwood*":"F","Crabapple":"F","Crape Myrtle":"B","Cryptomeria":"F","Cypress":"B",
-  "Elm - Cedar":"B","Elm - Chinese/Lacebark":"A","Elm - Siberian":"A","Elm - (all others)":"B",
-  "Oak - Live (<10”)":"B","Oak - Live (>10”)":"E",
-  "Xylosma":"C","Zelkova":"B"
-  /* ...include the rest of your species from the earlier list... */
+  "Acacia":"F",
+  "Ailanthus":"D",
+  "Alder":"F",
+  "Anaqua":"E",
+  "Arborvitae":"F",
+  "Ash":"F",
+  "Aspen":"F",
+  "California Pepper":"C",
+  "Boxelder":"A",
+  "Crape Myrtle":"B",
+  "Oak - Live (<10”)":"B",
+  "Oak - Live (>10”)":"E",
+  "Zelkova":"B"
+  // Add the rest of your big list here if you want 1:1
 };
 
-/* =========== PRODUCT CONFIGS (all products) =========== */
+/* 4. Product config — ALL PRODUCTS, more descriptive */
 const productConfig = {
   cambistat: {
     name: "Cambistat",
     showCambistat: true,
-    use: "Cambistat is a tree growth regulator used to slow canopy growth and redirect energy to roots and health.",
-    ppe: "Gloves, eye protection, long sleeves. Mix in a well-ventilated area. Soil drench/injection around dripline."
+    use: `Use: Tree growth regulator to reduce canopy growth, improve root growth and stress tolerance. Use species category A–F plus DBH to find exact mL product and water.
+Application: Soil drench/injection around root flare per label.
+Season: Often fall–winter or when soil is workable.`,
+    ppe: `PPE (paraphrased from label style):
+• Long-sleeved shirt and long pants
+• Chemical-resistant (nitrile or similar) gloves during mixing/loading
+• Shoes plus socks
+• Eye/face protection if splash hazard
+Avoid contact with skin and eyes. Do not eat or smoke while handling.`
   },
+
   xytect2f: {
-    name: "Xytect 2F",
+    name: "Xytect 2F (imidacloprid soil)",
     showDBH: true,
     showMethods: true,
     methods: ["Soil injection","Soil drench"],
     pests: [
-      {id:"light", label:"Most pests – 0.15 fl oz/in", rateFlOz:0.15},
-      {id:"heavy", label:"Higher pressure – 0.3 fl oz/in", rateFlOz:0.3},
-      {id:"max", label:"Max label – 0.4 fl oz/in", rateFlOz:0.4}
+      {id:"standard", label:"Standard labeled insects – 0.15 fl oz/in DBH", rateFlOz:0.15},
+      {id:"heavy", label:"Higher pressure or tough pests – 0.3 fl oz/in DBH", rateFlOz:0.3},
+      {id:"max", label:"Do not exceed label max – 0.4 fl oz/in DBH", rateFlOz:0.4}
     ],
-    use: "Systemic imidacloprid for sucking pests/borers via soil.",
-    ppe: "Chemical-resistant gloves, eye protection. Inject/drench close to trunk; do not apply to standing water."
+    use: `Use: Systemic insecticide for many tree/shrub pests (adelgids, soft/hard scales, leafminers, aphids, some borers) when soil uptake is acceptable.
+Application: Inject or drench close to trunk for best uptake. Irrigate if soil is dry.
+Season: Spring or fall preferred; can be used outside leaf-out in some cases.`,
+    ppe: `PPE:
+• Long-sleeved shirt and long pants
+• Shoes plus socks
+• Chemical-resistant gloves when mixing/loading
+• Protective eyewear if splashing
+Avoid application to standing water or saturated soils.`
   },
+
   xytect10: {
-    name: "Xytect 10% Infusible",
+    name: "Xytect 10% (more concentrated)",
     showDBH: true,
     showMethods: true,
-    methods: ["Trunk injection"],
+    methods: ["Soil injection","Soil drench"],
     pests: [
-      {id:"soft", label:"Soft-bodied pests (lower band)", group:"soft"},
-      {id:"borer", label:"Borers / EAB (upper band)", group:"borer"}
+      {id:"std", label:"Standard pests – 0.1 fl oz/in DBH", rateFlOz:0.1},
+      {id:"med", label:"Medium pressure – 0.2 fl oz/in DBH", rateFlOz:0.2},
+      {id:"high", label:"High pressure / label max – 0.3 fl oz/in DBH", rateFlOz:0.3}
     ],
-    use: "High-concentration imidacloprid for trunk injection when soil uptake isn’t good.",
-    ppe: "Gloves, eye/face protection, drill PPE. Inject into active xylem; follow device instructions."
+    use: `Use: Higher concentration imidacloprid for trees with more challenging uptake or where volume must be minimized.
+Application: Soil injection/drench at base, per label chart for DBH.
+Season: spring/fall.`,
+    ppe: `PPE:
+• Long sleeves, long pants
+• Chemical-resistant gloves
+• Shoes plus socks
+• Eye protection when mixing`
   },
+
   transtect70: {
-    name: "Transtect 70WSP",
+    name: "Transtect 70 WSP (dinotefuran)",
     showDBH: true,
     showMethods: true,
-    methods: ["Soil drench","Soil injection","Bark spray"],
-    pests: [{id:"default", label:"General labeled insects", ratePackets:1}],
-    use: "Fast-acting dinotefuran systemic for many tree/shrub pests.",
-    ppe: "Gloves, eye protection, long sleeves. Dissolve packet fully before application."
+    methods: ["Soil drench","Soil injection","Bark spray (label)"],
+    pests: [{id:"general", label:"General labeled insects (follow packet chart)", ratePackets:1}],
+    use: `Use: Fast-acting dinotefuran for many insects on ornamentals; can be used as soil or bark application depending on label.
+Application: Dissolve packet(s) in water and apply around trunk, or make bark spray to runoff.
+Season: Spring–summer in active growth for fast knockdown.`,
+    ppe: `PPE:
+• Long-sleeved shirt and long pants
+• Chemical-resistant gloves
+• Shoes plus socks
+• Eye protection when handling packets
+Do not breathe dust or spray mist.`
   },
+
   transtectInfusible: {
     name: "Transtect Infusible",
     showDBH: true,
     showMethods: true,
     methods: ["Trunk injection"],
-    use: "Injection formulation of dinotefuran.",
-    ppe: "Gloves, eye protection. Inject into root flare or approved sites."
+    use: `Use: Injection formulation of dinotefuran when soil or bark treatments are not practical.
+Application: Inject per device instructions into active xylem; space evenly around tree.
+Check label for max solution per tree.`,
+    ppe: `PPE:
+• Long sleeves, long pants
+• Chemical-resistant gloves
+• Eye/face protection during injection
+Wash after handling.`
   },
+
   trimtect: {
     name: "Trimtect",
     showDBH: true,
     showMethods: true,
-    methods: ["Basal drench","Soil injection"],
-    use: "Growth regulator for trees/shrubs, RTU 1:11.",
-    ppe: "Gloves, eye protection, avoid skin contact. Apply RTU evenly around base."
+    methods: ["Basal/soil drench","Soil injection"],
+    use: `Use: Growth regulator for certain trees/shrubs to reduce shoot growth, often used in fall/winter programs or around utility areas.
+Application: Dilute concentrate per label and apply around base of plant over root zone.
+Season: fall/winter or before flush to maintain control.`,
+    ppe: `PPE:
+• Long sleeves, long pants
+• Chemical-resistant gloves
+• Shoes plus socks
+Avoid contact with skin/eyes and avoid application to non-targets.`
   },
+
   reliant: {
     name: "Reliant (phosphite)",
     showDBH: true,
     showMethods: true,
-    methods: ["Trunk injection (20 mL mix per tree)"],
-    use: "Phosphite for certain diseases via injection.",
-    ppe: "Gloves, eye protection. Inject into root flare; do not over-pressurize."
+    methods: ["Trunk injection","Soil drench"],
+    pests: [
+      {id:"disease", label:"Label disease rate – 10 mL/in DBH, dilute 1 L/in", rateMlPerIn:10, waterLPerIn:1}
+    ],
+    use: `Use: Phosphite systemic for management/suppression of certain tree diseases (compare to your label).
+Application: Often injected at flare roots or applied to soil, in enough water for uptake.
+Season: can be used cool or warm season depending on disease timing.`,
+    ppe: `PPE:
+• Long-sleeved shirt, long pants
+• Chemical-resistant gloves
+• Eye protection
+• Shoes plus socks
+Do not get in eyes or on clothing.`
   },
+
   proxite: {
-    name: "Proxite",
+    name: "Proxite (IGR)",
     showSpray: true,
-    use: "IGR for scale/insect programs, tank-mixed.",
-    ppe: "Gloves, eye protection, long sleeves. Spray for good coverage."
+    pests: [
+      {id:"ornLow", label:"Ornamentals – 8 fl oz / 100 gal", rateFlOzPer100: 8},
+      {id:"ornHigh", label:"Heavy population – 16 fl oz / 100 gal", rateFlOzPer100: 16}
+    ],
+    use: `Use: Insect growth regulator for certain ornamental pests (immature stages).
+Application: Make thorough spray coverage, may need adjuvant (if allowed).
+Season: spring/summer when pests are active.`,
+    ppe: `PPE:
+• Long-sleeved shirt and long pants
+• Chemical-resistant gloves
+• Shoes plus socks
+Avoid drift to non-target plants.`
   },
+
   myclotect: {
     name: "Myclotect",
     showSpray: true,
-    use: "Fungicide (myclobutanil) for ornamental disease programs.",
-    ppe: "Gloves, eye protection, long sleeves. Apply as thorough foliage spray."
+    pests: [
+      {id:"foliar", label:"Foliar diseases – 6 fl oz / 100 gal (example)", rateFlOzPer100: 6},
+      {id:"higher", label:"Heavier disease – 12 fl oz / 100 gal", rateFlOzPer100: 12}
+    ],
+    use: `Use: Myclobutanil fungicide for ornamental disease programs as a foliar spray.
+Application: Apply as uniform spray to run-off; repeat per label interval.
+Season: spring/summer disease windows.`,
+    ppe: `PPE:
+• Long-sleeved shirt and long pants
+• Chemical-resistant gloves
+• Shoes plus socks
+• Eye protection when mixing
+Do not apply when wind may cause drift.`
   },
+
   onmark: {
-    name: "Onmark Herbicide (manual)",
+    name: "Onmark Herbicide",
     showSpray: true,
-    use: "Herbicide — follow exact label rate for target species.",
-    ppe: "Gloves, eye protection, long sleeves, sometimes respirator depending on label."
+    pests: [
+      {id:"1pct", label:"1% solution (spot / low weeds)", percent:1},
+      {id:"2pct", label:"2% solution (tougher weeds)", percent:2}
+    ],
+    use: `Use: Herbicide for labeled weeds/brush (see actual label for species list).
+Application: Mix to desired % in water and spray to wet.
+Season: growing season, warm months.`,
+    ppe: `PPE:
+• Long sleeves, long pants
+• Chemical-resistant gloves
+• Shoes plus socks
+• Eye protection
+Do not spray over water; avoid drift.`
   },
+
   bifenamite2sc: {
     name: "Bifenamite 2SC",
     showSpray: true,
     pests: [
-      {id:"low", label:"Mites – 8 fl oz / 100 gal", rateFlOzPer100: 8},
-      {id:"high", label:"Mites (heavy) – 16 fl oz / 100 gal", rateFlOzPer100: 16}
+      {id:"mitesLow", label:"Mites – 8 fl oz / 100 gal", rateFlOzPer100: 8},
+      {id:"mitesHigh", label:"Mites (heavy) – 16 fl oz / 100 gal", rateFlOzPer100: 16}
     ],
-    use: "Miticide for ornamental mites; adjuvant often improves results.",
-    ppe: "Gloves, eye protection, spray in calm conditions."
+    use: `Use: Miticide for ornamental mites.
+Application: Thorough spray to foliage, may need higher volume for large/tall trees.`,
+    ppe: `PPE:
+• Long sleeves, long pants
+• Chemical-resistant gloves
+• Shoes plus socks
+Avoid drift and runoff.`
   },
+
   biorush: {
     name: "Biorush Plus 3-0-11",
     showSpray: true,
-    use: "Nutritional/biostimulant — label says 1 lb/50 gal, we scale it.",
-    ppe: "Gloves, avoid dust, mix into tank with agitation."
+    use: `Use: Nutritional/biostimulant material to improve vigor, often 1 lb in 50 gal.
+Application: Add to spray tank with agitation, apply to foliage or soil depending on program.`,
+    ppe: `PPE:
+• Long sleeves, long pants
+• Gloves when handling dry material
+• Shoes plus socks`,
+    // We'll treat as 1 lb / 50 gal
   },
+
   diamid: {
-    name: "Diamid T&O",
+    name: "Diamid (ornamental insecticide)",
     showSpray: true,
-    pests: [{id:"ornamental", label:"Ornamentals – 8 fl oz / 100 gal", rateFlOzPer100: 8}],
-    use: "Insecticide for ornamentals at fixed spray rates.",
-    ppe: "Gloves, eye protection, long sleeves."
+    pests: [
+      {id:"orn", label:"Ornamentals – 8 fl oz / 100 gal", rateFlOzPer100: 8}
+    ],
+    use: `Use: Ornamentals insecticide at fixed spray rate.
+Application: Good coverage, adjust water volume to plant size.`,
+    ppe: `PPE:
+• Long sleeves, long pants
+• Chemical-resistant gloves
+• Shoes plus socks`
   },
+
   junction: {
-    name: "Junction DF",
+    name: "Junction DF (copper + mancozeb)",
     showSpray: true,
-    use: "Copper + mancozeb fungicide/bactericide — we scale to gal.",
-    ppe: "Gloves, protective clothing, avoid inhaling dust, copper stains. Mix outside."
+    use: `Use: Fungicide/bactericide for labeled ornamental diseases.
+Application: Mix prescribed lb per 100 gal; apply to run-off; repeat per interval.`,
+    ppe: `PPE:
+• Long-sleeved shirt and long pants
+• Chemical-resistant gloves
+• Shoes plus socks
+• Eye protection
+Avoid breathing dust.`
   },
+
   lepitect: {
     name: "Lepitect Infusible",
     showDBH: true,
     showMethods: true,
     methods: ["Trunk injection"],
-    use: "Injection acephate for caterpillars/leaf-feeders.",
-    ppe: "Gloves, eye/face protection, follow injection device."
+    use: `Use: Systemic acephate injection for caterpillars and other leaf-feeding insects in trees.
+Application: Inject into root flare/xylem per device, volume based on DBH.`,
+    ppe: `PPE:
+• Long-sleeved shirt, long pants
+• Chemical-resistant gloves
+• Eye/face protection during injection
+Wash thoroughly after handling.`
   },
+
   mectinite: {
-    name: "Mectinite",
+    name: "Mectinite (emamectin)",
     showDBH: true,
     showMethods: true,
     methods: ["Trunk injection"],
-    use: "Emamectin benzoate injection for borers, EAB, some caterpillars.",
-    ppe: "Gloves, eye/face protection, injection PPE."
+    use: `Use: Injection formulation for borers/EAB/certain caterpillars, long residual.
+Application: Inject at root flare, multiple ports as needed.`,
+    ppe: `PPE:
+• Long sleeves, long pants
+• Chemical-resistant gloves
+• Eye protection
+Avoid skin contact.`
   },
+
   moistureaide: {
     name: "MoistureAide",
     showDBH: true,
     showMethods: true,
-    methods: ["Soil injection","Soil drench"],
-    use: "Water management / soil surfactant-type material for trees.",
-    ppe: "Gloves, eye protection. Inject/drench around root zone."
+    methods: ["Soil drench","Soil injection"],
+    use: `Use: Soil moisture management / wetting agent around root zone.
+Application: Dilute and apply around root zone in labeled volume of water.`,
+    ppe: `PPE:
+• Long sleeves, long pants
+• Chemical-resistant gloves
+• Shoes plus socks`
   },
+
   scrimmage: {
-    name: "Scrimmage (NIS/silicone)",
+    name: "Scrimmage 03F (adjuvant)",
     showSpray: true,
     pests: [
-      {id:"insectfung", label:"Insecticides/Fungicides – 6–32 fl oz/100 gal (use 16)", rateFlOzPer100: 16},
-      {id:"herb", label:"Herbicides/defoliants – 12–64 fl oz/100 gal (use 32)", rateFlOzPer100: 32}
+      {id:"withPesticide", label:"With insecticide/fungicide – 16 fl oz / 100 gal", rateFlOzPer100: 16},
+      {id:"withHerbicide", label:"With herbicide – 32 fl oz / 100 gal", rateFlOzPer100: 32}
     ],
-    use: "Nonionic + organosilicone surfactant to improve coverage and penetration. Use only if pesticide label allows. :contentReference[oaicite:3]{index=3}",
-    ppe: "Gloves, eye/face protection. Keep out of water bodies. Clean tank before use."
+    use: `Use: Nonionic / organosilicone type adjuvant to improve coverage/spread of labeled products, ONLY if main product allows an adjuvant.
+Application: Add last to tank with agitation.`,
+    ppe: `PPE:
+• Long sleeves, long pants
+• Chemical-resistant gloves
+• Shoes plus socks
+Avoid eye contact, add to tank last.`
   },
+
   abamectin015: {
     name: "Abamectin 0.15 Select",
     showSpray: true,
     pests: [
-      {id:"ornlow", label:"Mites/insects – 8 fl oz/100 gal", rateFlOzPer100: 8},
-      {id:"ornhigh", label:"Higher pressure – 16 fl oz/100 gal", rateFlOzPer100: 16}
+      {id:"ornLow", label:"Ornamentals – 8 fl oz / 100 gal", rateFlOzPer100: 8},
+      {id:"ornHigh", label:"Heavier infestations – 16 fl oz / 100 gal", rateFlOzPer100: 16}
     ],
-    use: "Abamectin miticide/insecticide for ornamentals, good with surfactant. :contentReference[oaicite:4]{index=4}",
-    ppe: "Gloves, eye protection, long sleeves; avoid drift to water."
+    use: `Use: Abamectin miticide/insecticide on ornamentals.
+Application: Thorough coverage; may need repeat in 7–14 days per label.`,
+    ppe: `PPE:
+• Long-sleeved shirt and long pants
+• Chemical-resistant gloves
+• Shoes plus socks
+Avoid drift to water.`
   },
+
   alamo: {
     name: "Alamo (propiconazole)",
     showDBH: true,
     showMethods: true,
     methods: ["Flare-root injection"],
     pests: [
-      {id:"oakwilt", label:"Oak wilt / preventive – 10 mL/in in up to 1 L water/in", rateMlPerIn: 10, waterLPerIn: 1},
-      {id:"oakwiltHigh", label:"Oak wilt / high pressure – 20 mL/in in up to 1 L water/in", rateMlPerIn: 20, waterLPerIn: 1},
-      {id:"dutchElm", label:"Dutch elm disease – 6–10 mL/in, use 10 mL/in", rateMlPerIn: 10, waterLPerIn: 1}
+      {id:"oakWilt", label:"Oak wilt / preventive – 10 mL/in DBH (dilute up to 1 L/in)", rateMlPerIn:10, waterLPerIn:1},
+      {id:"oakWiltHigh", label:"Oak wilt / therapeutic – 20 mL/in DBH (dilute up to 1 L/in)", rateMlPerIn:20, waterLPerIn:1},
+      {id:"dutchElm", label:"Dutch elm disease – 10 mL/in DBH", rateMlPerIn:10, waterLPerIn:1}
     ],
-    use: "Systemic fungicide for oak wilt, DED, sycamore anthracnose via root-flare injection. :contentReference[oaicite:5]{index=5}",
-    ppe: "WARNING label: goggles/face shield, chemical-resistant gloves, long sleeves. Drill flare roots, inject 20–30 psi, use up to 1 L water per inch."
+    use: `Use: Systemic fungicide injected into flare roots for oak wilt, Dutch elm disease and similar labeled diseases.
+Application: Drill holes at root flare, insert injection tees, infuse diluted solution until uptake is complete.`,
+    ppe: `PPE:
+• Long-sleeved shirt and long pants
+• Chemical-resistant gloves
+• Protective eyewear / face shield
+• Shoes plus socks
+Avoid exposure during drilling/injection.`
   }
 };
 
-/* =========== HELPERS =========== */
-function populateSpecies() {
-  const sel = document.getElementById("species");
-  sel.innerHTML = "";
-  const names = Object.keys(speciesToCategory).sort((a,b)=>a.localeCompare(b));
-  names.forEach(n => {
-    const opt = document.createElement("option");
-    opt.value = n;
-    opt.textContent = n;
+/* 5. helpers */
+function showSection(id, show){ document.getElementById(id).style.display = show ? "" : "none"; }
+function formatMl(v){ return Math.round(v); }
+function gallonsToMl(g){ return g*3785.41; }
+function lbToGrams(lb){ return lb*453.592; }
+
+/* 6. populate species */
+function populateSpecies(){
+  const sel=document.getElementById("species");
+  sel.innerHTML="";
+  Object.keys(speciesToCategory).sort().forEach(n=>{
+    const opt=document.createElement("option");
+    opt.value=n; opt.textContent=n;
     sel.appendChild(opt);
   });
 }
+populateSpecies();
 
-function showSection(id, show) {
-  document.getElementById(id).style.display = show ? "" : "none";
-}
-function formatMl(v) { return Math.round(v); }
-function gallonsToMl(gal) { return gal * 3785.41; }
-function lbToGrams(lb) { return lb * 453.592; }
-
-/* =========== SEASON CHANGE =========== */
-document.getElementById("season").addEventListener("change", () => {
+/* 7. season changed */
+document.getElementById("season").addEventListener("change", ()=>{
   const season = document.getElementById("season").value;
-  const productSel = document.getElementById("product");
-  productSel.innerHTML = "";
+  const prodSel = document.getElementById("product");
+  prodSel.innerHTML = "";
   if (!season || !seasonProducts[season]) {
-    productSel.disabled = true;
-    productSel.innerHTML = '<option value="">-- pick a season first --</option>';
+    prodSel.disabled = true;
+    prodSel.innerHTML = '<option value="">-- pick a season first --</option>';
     document.getElementById("tabs").style.display = "none";
     return;
   }
-  seasonProducts[season].forEach(pid => {
+  seasonProducts[season].forEach(pid=>{
     const cfg = productConfig[pid];
-    if (cfg) {
+    if (cfg){
       const opt = document.createElement("option");
       opt.value = pid;
       opt.textContent = cfg.name;
-      productSel.appendChild(opt);
+      prodSel.appendChild(opt);
     }
   });
-  productSel.disabled = false;
-  productSel.selectedIndex = 0;
+  prodSel.disabled = false;
   document.getElementById("tabs").style.display = "";
   updateProductUI();
 });
 
-/* =========== PRODUCT CHANGE =========== */
+/* 8. product changed */
 document.getElementById("product").addEventListener("change", updateProductUI);
 
-function updateProductUI() {
+function updateProductUI(){
   const product = document.getElementById("product").value;
   if (!product) return;
   const cfg = productConfig[product];
 
-  // tab: reset to Use
-  setActiveTab("use");
+  // show text
+  document.getElementById("useText").textContent = cfg.use || "See label.";
+  document.getElementById("ppeText").textContent = cfg.ppe || "See label.";
 
-  // fill use/ppe text
-  document.getElementById("useText").textContent = cfg.use || "No description set.";
-  document.getElementById("ppeText").textContent = cfg.ppe || "Follow label PPE.";
-
-  // hide all dose inputs first
+  // reset calc sections
   showSection("cambistatInputs", false);
   showSection("dbhInputs", false);
   showSection("methodWrap", false);
@@ -513,385 +596,247 @@ function updateProductUI() {
   showSection("sprayInputs", false);
   showSection("results", false);
 
-  // set up dose inputs for this product
   if (cfg.showCambistat) {
     showSection("cambistatInputs", true);
     calcCambistat();
-  } else {
-    if (cfg.showDBH) showSection("dbhInputs", true);
-    if (cfg.showMethods) {
-      const methodSel = document.getElementById("method");
-      methodSel.innerHTML = "";
-      cfg.methods.forEach(m => {
-        const opt = document.createElement("option");
-        opt.value = m;
-        opt.textContent = m;
-        methodSel.appendChild(opt);
-      });
-      showSection("methodWrap", true);
-    }
-    if (cfg.pests) {
-      const pestSel = document.getElementById("pest");
-      pestSel.innerHTML = "";
-      cfg.pests.forEach(p => {
-        const opt = document.createElement("option");
-        opt.value = p.id;
-        opt.textContent = p.label;
-        pestSel.appendChild(opt);
-      });
-      showSection("pestWrap", true);
-    }
-    if (cfg.showSpray) {
-      showSection("sprayInputs", true);
-    }
-    computeCurrentProduct();
+    return;
   }
+
+  if (cfg.showDBH) showSection("dbhInputs", true);
+  if (cfg.showMethods) {
+    const mSel = document.getElementById("method");
+    mSel.innerHTML = "";
+    cfg.methods.forEach(m=>{
+      const o = document.createElement("option");
+      o.value = m; o.textContent = m;
+      mSel.appendChild(o);
+    });
+    showSection("methodWrap", true);
+  }
+  if (cfg.pests) {
+    const pSel = document.getElementById("pest");
+    pSel.innerHTML = "";
+    cfg.pests.forEach(p=>{
+      const o = document.createElement("option");
+      o.value = p.id;
+      o.textContent = p.label;
+      pSel.appendChild(o);
+    });
+    showSection("pestWrap", true);
+  }
+  if (cfg.showSpray) {
+    showSection("sprayInputs", true);
+  }
+
+  computeCurrentProduct();
 }
 
-/* =========== TABS =========== */
-document.querySelectorAll(".tab-btn").forEach(btn => {
-  btn.addEventListener("click", () => {
-    const tab = btn.getAttribute("data-tab");
-    setActiveTab(tab);
+/* 9. tabs */
+document.querySelectorAll(".tab-btn").forEach(btn=>{
+  btn.addEventListener("click",()=>{
+    document.querySelectorAll(".tab-btn").forEach(b=>b.classList.remove("active"));
+    document.querySelectorAll(".panel").forEach(p=>p.classList.remove("active"));
+    btn.classList.add("active");
+    document.getElementById(`panel-${btn.dataset.tab}`).classList.add("active");
   });
 });
-function setActiveTab(tab) {
-  document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
-  document.querySelectorAll(".panel").forEach(p => p.classList.remove("active"));
-  document.querySelector(`.tab-btn[data-tab="${tab}"]`).classList.add("active");
-  document.getElementById(`panel-${tab}`).classList.add("active");
-}
 
-/* =========== CAMBISTAT DOSE =========== */
-function calcCambistat() {
+/* 10. Cambistat calc */
+function calcCambistat(){
   const species = document.getElementById("species").value;
   const dbh = parseInt(document.getElementById("dbhCambistat").value, 10);
   const results = document.getElementById("results");
   const doseText = document.getElementById("doseText");
   const waterText = document.getElementById("waterText");
   const totalText = document.getElementById("totalText");
-
   if (isNaN(dbh) || dbh < 4 || dbh > 47) {
-    results.style.display = "";
-    doseText.textContent = "DBH must be between 4 and 47 inches for Cambistat table.";
+    showSection("results", true);
+    doseText.textContent = "DBH must be between 4 and 47 in for Cambistat table.";
     waterText.textContent = "";
     totalText.textContent = "";
     return;
   }
-
   let category;
   if (species === "Oak - Live (<10”)") {
-    category = (dbh < 10) ? "B" : "E";
+    category = dbh < 10 ? "B" : "E";
   } else if (species === "Oak - Live (>10”)") {
-    category = (dbh > 10) ? "E" : "B";
+    category = dbh > 10 ? "E" : "B";
   } else {
     category = speciesToCategory[species] || "F";
   }
-
   const row = cambistatData[dbh];
   const cell = row[category];
-  const productMl = cell.product;
-  const waterMl = cell.water;
-  const totalMl = productMl + waterMl;
-
-  results.style.display = "";
-  doseText.textContent = `Product: ${productMl} mL Cambistat (Category ${category})`;
-  waterText.textContent = `Water to mix with: ${waterMl} mL`;
-  totalText.textContent = `Total solution: ${totalMl} mL`;
+  showSection("results", true);
+  doseText.textContent = `Product: ${cell.product} mL Cambistat (Category ${category})`;
+  waterText.textContent = `Water: ${cell.water} mL`;
+  totalText.textContent = `Total: ${cell.product + cell.water} mL`;
 }
 
-/* =========== OTHER PRODUCTS DOSE =========== */
-function computeCurrentProduct() {
+/* 11. Generic calculator by product */
+function computeCurrentProduct(){
   const product = document.getElementById("product").value;
   const cfg = productConfig[product];
+  if (!cfg) return;
   const results = document.getElementById("results");
   const doseText = document.getElementById("doseText");
   const waterText = document.getElementById("waterText");
   const totalText = document.getElementById("totalText");
-  results.style.display = "";
-  doseText.textContent = "";
-  waterText.textContent = "";
-  totalText.textContent = "";
+  showSection("results", true);
 
-  /* Xytect 2F */
-  if (product === "xytect2f") {
+  // Cambistat is handled separately
+  if (cfg.showCambistat) return;
+
+  // 11a. Soil imidacloprid-type (xytect2f, xytect10)
+  if (product === "xytect2f" || product === "xytect10") {
     const dbh = parseFloat(document.getElementById("dbh").value || "0");
     const pestId = document.getElementById("pest").value;
     const method = document.getElementById("method").value;
-    const pest = cfg.pests.find(p => p.id === pestId) || cfg.pests[0];
-    const mlPerIn = pest.rateFlOz * 29.5735;
+    const pest = (cfg.pests || [])[0] || {rateFlOz:0.15};
+    const chosen = cfg.pests.find(p=>p.id===pestId) || pest;
+    const mlPerIn = chosen.rateFlOz * 29.5735;
     const productMl = mlPerIn * dbh;
-    let waterMl = 0;
+    let waterMl;
     if (method === "Soil injection") {
-      const gallons = dbh * 1;
-      waterMl = gallonsToMl(gallons);
-      waterText.textContent = `Water: ${formatMl(waterMl)} mL (≈ ${gallons.toFixed(1)} gal).`;
+      const gals = Math.max(1, dbh * 1);
+      waterMl = gallonsToMl(gals);
+      waterText.textContent = `Water: ${formatMl(waterMl)} mL (≈ ${gals.toFixed(1)} gal)`;
     } else {
-      const gallons = 2;
-      waterMl = gallonsToMl(gallons);
-      waterText.textContent = `Water: ${formatMl(waterMl)} mL (example 2 gal; label says sufficient water).`;
+      const gals = 2;
+      waterMl = gallonsToMl(gals);
+      waterText.textContent = `Water: ${formatMl(waterMl)} mL (example 2 gal drench)`;
     }
-    doseText.textContent = `Product: ${formatMl(productMl)} mL Xytect 2F at ${pest.rateFlOz} fl oz/in × ${dbh} in.`;
+    doseText.textContent = `Product: ${formatMl(productMl)} mL ${cfg.name} at ${chosen.rateFlOz} fl oz/in × ${dbh} in`;
     totalText.textContent = `Total mix: ${formatMl(productMl + waterMl)} mL`;
     return;
   }
 
-  /* Xytect 10% Infusible */
-  if (product === "xytect10") {
+  // 11b. Alamo / Reliant / trunk fungicides
+  if (product === "alamo" || product === "reliant") {
     const dbh = parseFloat(document.getElementById("dbh").value || "0");
     const pestId = document.getElementById("pest").value;
-    let perInch;
-    if (pestId === "soft") {
-      perInch = dbh < 12 ? 1.5 : (dbh < 24 ? 3 : 4.5);
-    } else {
-      perInch = dbh < 12 ? 2 : (dbh < 24 ? 4 : 6);
-    }
-    const productMl = perInch * dbh;
-    doseText.textContent = `Product: ${formatMl(productMl)} mL Xytect 10% Infusible (${perInch} mL/in).`;
-    waterText.textContent = `Water: per injection device/label.`;
-    totalText.textContent = `Total: ≈ ${formatMl(productMl)} mL.`;
+    const p = (cfg.pests || [])[0];
+    const chosen = (cfg.pests || []).find(x=>x.id===pestId) || p;
+    const productMl = chosen.rateMlPerIn * dbh;
+    const waterMl = chosen.waterLPerIn * dbh * 1000;
+    doseText.textContent = `Product: ${formatMl(productMl)} mL ${cfg.name} (${chosen.rateMlPerIn} mL/in × ${dbh} in)`;
+    waterText.textContent = `Water: up to ${formatMl(waterMl)} mL (≈ ${(waterMl/1000).toFixed(1)} L)`;
+    totalText.textContent = `Apply by flare-root injection per label.`;
     return;
   }
 
-  /* Transtect 70WSP */
+  // 11c. Transtect 70 WSP
   if (product === "transtect70") {
     const dbh = parseFloat(document.getElementById("dbh").value || "0");
-    const method = document.getElementById("method").value;
+    // 1 packet per 17" DBH (example simplification)
     const packets = Math.ceil(dbh / 17);
-    doseText.textContent = `Product: ${packets} packet(s) Transtect 70WSP (1 packet per ≤17" DBH).`;
+    const method = document.getElementById("method").value;
+    doseText.textContent = `Product: ${packets} packet(s) Transtect 70 WSP for ${dbh} in DBH.`;
     if (method === "Bark spray") {
-      waterText.textContent = `Water: ~1 gal per packet group (enough to wet bark).`;
-      totalText.textContent = `Total spray: ~1 gal (adjust to runoff).`;
+      waterText.textContent = `Water: enough to wet bark (≈1–2 gal total).`;
+      totalText.textContent = `Spray to runoff.`;
     } else {
-      const pintsPerIn = 2;
-      const totalPints = pintsPerIn * dbh;
-      const gallons = totalPints / 8;
-      const waterMl = gallonsToMl(gallons);
-      waterText.textContent = `Water: ${formatMl(waterMl)} mL (≈ ${gallons.toFixed(2)} gal).`;
-      totalText.textContent = `Total dilute solution: same as water; dissolve packets in it.`;
+      const gals = Math.max(2, dbh * 0.25);
+      const waterMl = gallonsToMl(gals);
+      waterText.textContent = `Water: ${formatMl(waterMl)} mL (≈ ${gals.toFixed(1)} gal)`;
+      totalText.textContent = `Apply around root zone / injection sites.`;
     }
     return;
   }
 
-  /* Transtect Infusible */
-  if (product === "transtectInfusible") {
+  // 11d. Transtect Infusible / Lepitect / Mectinite (injection ml/in)
+  if (product === "transtectInfusible" || product === "lepitect" || product === "mectinite") {
     const dbh = parseFloat(document.getElementById("dbh").value || "0");
-    let perInch = dbh < 12 ? 2 : (dbh < 24 ? 4 : 6);
-    const productMl = perInch * dbh;
-    doseText.textContent = `Product: ${formatMl(productMl)} mL Transtect Infusible (${perInch} mL/in).`;
-    waterText.textContent = `Water: per injection system.`;
-    totalText.textContent = `Total: ≈ ${formatMl(productMl)} mL.`;
+    let perIn;
+    if (product === "transtectInfusible") perIn = dbh < 12 ? 2 : (dbh < 24 ? 4 : 6);
+    if (product === "lepitect")       perIn = dbh < 12 ? 4 : (dbh < 24 ? 6 : 8);
+    if (product === "mectinite")      perIn = dbh < 12 ? 4 : (dbh < 24 ? 8 : 10);
+    const productMl = perIn * dbh;
+    doseText.textContent = `Product: ${formatMl(productMl)} mL ${cfg.name} (${perIn} mL/in × ${dbh} in).`;
+    waterText.textContent = `Water: per injection device / label (enough to deliver).`;
+    totalText.textContent = `Inject evenly around root flare.`;
     return;
   }
 
-  /* Trimtect */
-  if (product === "trimtect") {
-    const dbh = parseFloat(document.getElementById("dbh").value || "0");
-    const method = document.getElementById("method").value;
-    const rtuPerInch = 450;
-    const rtuTotal = rtuPerInch * dbh;
-    const productMl = rtuTotal / 12;
-    const waterMl = rtuTotal - productMl;
-    doseText.textContent = `Product (concentrate): ${formatMl(productMl)} mL Trimtect.`;
-    waterText.textContent = `Water: ${formatMl(waterMl)} mL (1:11).`;
-    totalText.textContent = `Apply ${formatMl(rtuTotal)} mL RTU around base (${method}).`;
-    return;
-  }
-
-  /* Reliant */
-  if (product === "reliant") {
-    const finishedPerTree = 20;
-    const totalMixMl = 3785 + 7570 + 118;
-    const productMl = finishedPerTree * (3785/totalMixMl);
-    const waterMl = finishedPerTree * (7570/totalMixMl);
-    const adjuvantMl = finishedPerTree * (118/totalMixMl);
-    doseText.textContent = `Product: ${formatMl(productMl)} mL Reliant per tree.`;
-    waterText.textContent = `Water: ${formatMl(waterMl)} mL + surfactant ≈ ${adjuvantMl.toFixed(1)} mL.`;
-    totalText.textContent = `Total injection: 20 mL per tree.`;
-    return;
-  }
-
-  /* Proxite */
-  if (product === "proxite") {
-    const sprayGal = parseFloat(document.getElementById("sprayVol").value || "0");
-    const rate = 8; // fl oz / 100 gal example
-    const neededFlOz = rate * (sprayGal / 100);
-    const productMl = neededFlOz * 29.5735;
-    doseText.textContent = `Product: ${formatMl(productMl)} mL Proxite for ${sprayGal} gal (8 fl oz/100 gal).`;
-    waterText.textContent = `Water: to ${sprayGal} gal.`;
-    totalText.textContent = `Total spray: ${sprayGal} gal.`;
-    return;
-  }
-
-  /* Myclotect (spray) */
-  if (product === "myclotect") {
-    const sprayGal = parseFloat(document.getElementById("sprayVol").value || "0");
-    const rate = 4;
-    const neededFlOz = rate * (sprayGal / 100);
-    const productMl = neededFlOz * 29.5735;
-    doseText.textContent = `Product: ${formatMl(productMl)} mL Myclotect for ${sprayGal} gal (4 fl oz/100 gal example).`;
-    waterText.textContent = `Water: to ${sprayGal} gal.`;
-    totalText.textContent = `Total spray: ${sprayGal} gal.`;
-    return;
-  }
-
-  /* Onmark manual */
-  if (product === "onmark") {
-    const sprayGal = parseFloat(document.getElementById("sprayVol").value || "0");
-    doseText.textContent = `Enter % solution from Onmark label, then multiply by ${sprayGal} gal.`;
-    waterText.textContent = `Water: to ${sprayGal} gal.`;
-    totalText.textContent = `Total: ${sprayGal} gal.`;
-    return;
-  }
-
-  /* Bifenamite 2SC */
-  if (product === "bifenamite2sc") {
+  // 11e. Spray products (myclotect, proxite, bifenamite2sc, diamid, junction, scrimmage, abamectin015)
+  if (cfg.showSpray) {
     const sprayGal = parseFloat(document.getElementById("sprayVol").value || "0");
     const pestId = document.getElementById("pest").value;
-    const p = cfg.pests.find(x => x.id === pestId) || cfg.pests[0];
-    const neededFlOz = p.rateFlOzPer100 * (sprayGal / 100);
+    const chosen = (cfg.pests || []).find(x=>x.id===pestId) || (cfg.pests || [])[0];
+    // onmark is special
+    if (product === "onmark") {
+      const pct = chosen ? chosen.percent : 1;
+      // percent solution = (pct/100) * total volume (ml)
+      const totalMl = gallonsToMl(sprayGal);
+      const productMl = totalMl * (pct/100);
+      doseText.textContent = `Product: ${formatMl(productMl)} mL Onmark for ${sprayGal} gal at ${pct}% solution.`;
+      waterText.textContent = `Water: to ${sprayGal} gal.`;
+      totalText.textContent = `Spray to wet target weeds.`;
+      return;
+    }
+    if (product === "biorush") {
+      // 1 lb / 50 gal
+      const lb = (1/50) * sprayGal;
+      const grams = lbToGrams(lb);
+      doseText.textContent = `Product: ${lb.toFixed(3)} lb (${grams.toFixed(1)} g) Biorush Plus 3-0-11 for ${sprayGal} gal.`;
+      waterText.textContent = `Water: to ${sprayGal} gal.`;
+      totalText.textContent = `Apply as directed.`;
+      return;
+    }
+    if (product === "junction") {
+      const lbPer100 = 1.5;
+      const neededLb = lbPer100 * (sprayGal / 100);
+      const grams = lbToGrams(neededLb);
+      doseText.textContent = `Product: ${neededLb.toFixed(3)} lb (${grams.toFixed(1)} g) Junction DF for ${sprayGal} gal.`;
+      waterText.textContent = `Water: to ${sprayGal} gal.`;
+      totalText.textContent = `Spray to runoff.`;
+      return;
+    }
+    // normal fl oz/100 gal products
+    const rate = (chosen && chosen.rateFlOzPer100) ? chosen.rateFlOzPer100 : 8;
+    const neededFlOz = rate * (sprayGal / 100);
     const productMl = neededFlOz * 29.5735;
-    doseText.textContent = `Product: ${formatMl(productMl)} mL Bifenamite 2SC for ${sprayGal} gal (${p.rateFlOzPer100} fl oz/100 gal).`;
-    waterText.textContent = `Water: to ${sprayGal} gal.`;
-    totalText.textContent = `Total spray: ${sprayGal} gal.`;
+    doseText.textContent = `Product: ${formatMl(productMl)} mL ${cfg.name} for ${sprayGal} gal at ${rate} fl oz/100 gal.`;
+    waterText.textContent = `Water: to ${sprayGal} gal total spray.`;
+    totalText.textContent = `Apply with good coverage.`;
     return;
   }
 
-  /* Biorush */
-  if (product === "biorush") {
-    const sprayGal = parseFloat(document.getElementById("sprayVol").value || "0");
-    const lbPerGal = 1/50;
-    const neededLb = lbPerGal * sprayGal;
-    const grams = lbToGrams(neededLb);
-    doseText.textContent = `Product: ${neededLb.toFixed(3)} lb (${grams.toFixed(1)} g) Biorush for ${sprayGal} gal.`;
-    waterText.textContent = `Water: to ${sprayGal} gal.`;
-    totalText.textContent = `Total: ${sprayGal} gal.`;
-    return;
-  }
-
-  /* Diamid */
-  if (product === "diamid") {
-    const sprayGal = parseFloat(document.getElementById("sprayVol").value || "0");
-    const p = (cfg.pests || [])[0] || {rateFlOzPer100:8};
-    const neededFlOz = p.rateFlOzPer100 * (sprayGal / 100);
-    const productMl = neededFlOz * 29.5735;
-    doseText.textContent = `Product: ${formatMl(productMl)} mL Diamid for ${sprayGal} gal at ${p.rateFlOzPer100} fl oz/100 gal.`;
-    waterText.textContent = `Water: to ${sprayGal} gal.`;
-    totalText.textContent = `Total spray: ${sprayGal} gal.`;
-    return;
-  }
-
-  /* Junction */
-  if (product === "junction") {
-    const sprayGal = parseFloat(document.getElementById("sprayVol").value || "0");
-    const lbPer100 = 1.5;
-    const neededLb = lbPer100 * (sprayGal / 100);
-    const grams = lbToGrams(neededLb);
-    doseText.textContent = `Product: ${neededLb.toFixed(3)} lb (${grams.toFixed(1)} g) Junction DF for ${sprayGal} gal.`;
-    waterText.textContent = `Water: to ${sprayGal} gal.`;
-    totalText.textContent = `Total spray: ${sprayGal} gal.`;
-    return;
-  }
-
-  /* Lepitect Infusible */
-  if (product === "lepitect") {
-    const dbh = parseFloat(document.getElementById("dbh").value || "0");
-    let perIn = dbh < 12 ? 4 : (dbh < 24 ? 6 : 8);
-    const productMl = perIn * dbh;
-    doseText.textContent = `Product: ${formatMl(productMl)} mL Lepitect Infusible (${perIn} mL/in).`;
-    waterText.textContent = `Water: per injection device / label.`;
-    totalText.textContent = `Total ≈ ${formatMl(productMl)} mL.`;
-    return;
-  }
-
-  /* Mectinite */
-  if (product === "mectinite") {
-    const dbh = parseFloat(document.getElementById("dbh").value || "0");
-    let perIn = dbh < 12 ? 4 : (dbh < 24 ? 8 : 10);
-    const productMl = perIn * dbh;
-    doseText.textContent = `Product: ${formatMl(productMl)} mL Mectinite (${perIn} mL/in).`;
-    waterText.textContent = `Water: per injection system.`;
-    totalText.textContent = `Total ≈ ${formatMl(productMl)} mL.`;
-    return;
-  }
-
-  /* MoistureAide */
+  // 11f. MoistureAide (DBH-based)
   if (product === "moistureaide") {
     const dbh = parseFloat(document.getElementById("dbh").value || "0");
     const method = document.getElementById("method").value;
-    const flOzPerIn = 6;
-    const productFlOz = flOzPerIn * dbh;
-    const productMl = productFlOz * 29.5735;
+    const flOzPerIn = 6; // example
+    const productMl = flOzPerIn * 29.5735 * dbh;
     if (method === "Soil injection") {
-      const gallons = 5 * dbh;
-      const waterMl = gallonsToMl(gallons);
-      doseText.textContent = `Product: ${formatMl(productMl)} mL MoistureAide (${flOzPerIn} fl oz/in).`;
-      waterText.textContent = `Water: ${formatMl(waterMl)} mL (≈ ${gallons.toFixed(1)} gal).`;
-      totalText.textContent = `Total solution: ${formatMl(productMl + waterMl)} mL.`;
+      const gals = 5 * dbh;
+      const waterMl = gallonsToMl(gals);
+      doseText.textContent = `Product: ${formatMl(productMl)} mL MoistureAide (${flOzPerIn} fl oz/in × ${dbh} in).`;
+      waterText.textContent = `Water: ${formatMl(waterMl)} mL (≈ ${gals.toFixed(1)} gal) to inject around root zone.`;
+      totalText.textContent = `Total: ${formatMl(productMl+waterMl)} mL.`;
     } else {
-      const gallons = 2;
-      const waterMl = gallonsToMl(gallons);
-      doseText.textContent = `Product: ${formatMl(productMl)} mL MoistureAide (${flOzPerIn} fl oz/in).`;
-      waterText.textContent = `Water: ${formatMl(waterMl)} mL.`;
-      totalText.textContent = `Total solution: ${formatMl(productMl + waterMl)} mL.`;
+      const gals = 2;
+      const waterMl = gallonsToMl(gals);
+      doseText.textContent = `Product: ${formatMl(productMl)} mL MoistureAide.`;
+      waterText.textContent = `Water: ${formatMl(waterMl)} mL (example drench).`;
+      totalText.textContent = `Total: ${formatMl(productMl+waterMl)} mL.`;
     }
     return;
   }
 
-  /* Scrimmage */
-  if (product === "scrimmage") {
-    const sprayGal = parseFloat(document.getElementById("sprayVol").value || "0");
-    const pestId = document.getElementById("pest").value;
-    const p = cfg.pests.find(x => x.id === pestId) || cfg.pests[0];
-    const neededFlOz = p.rateFlOzPer100 * (sprayGal / 100);
-    const productMl = neededFlOz * 29.5735;
-    doseText.textContent = `Product: ${formatMl(productMl)} mL Scrimmage for ${sprayGal} gal (${p.rateFlOzPer100} fl oz/100 gal).`;
-    waterText.textContent = `Water: to ${sprayGal} gal with pesticide mix.`;
-    totalText.textContent = `Total spray: ${sprayGal} gal.`;
-    return;
-  }
-
-  /* Abamectin 0.15 Select */
-  if (product === "abamectin015") {
-    const sprayGal = parseFloat(document.getElementById("sprayVol").value || "0");
-    const pestId = document.getElementById("pest").value;
-    const p = cfg.pests.find(x => x.id === pestId) || cfg.pests[0];
-    const neededFlOz = p.rateFlOzPer100 * (sprayGal / 100);
-    const productMl = neededFlOz * 29.5735;
-    doseText.textContent = `Product: ${formatMl(productMl)} mL Abamectin 0.15 Select for ${sprayGal} gal (${p.rateFlOzPer100} fl oz/100 gal).`;
-    waterText.textContent = `Water: to ${sprayGal} gal.`;
-    totalText.textContent = `Total spray: ${sprayGal} gal.`;
-    return;
-  }
-
-  /* Alamo */
-  if (product === "alamo") {
-    const dbh = parseFloat(document.getElementById("dbh").value || "0");
-    const pestId = document.getElementById("pest").value;
-    const p = cfg.pests.find(x => x.id === pestId) || cfg.pests[0];
-    const productMl = p.rateMlPerIn * dbh;
-    const waterL = p.waterLPerIn * dbh; // "up to" amount
-    const waterMl = waterL * 1000;
-    doseText.textContent = `Product: ${formatMl(productMl)} mL Alamo (${p.rateMlPerIn} mL/in × ${dbh} in).`;
-    waterText.textContent = `Water: up to ${waterMl.toFixed(0)} mL (≈ ${waterL.toFixed(1)} L) total injection solution.`;
-    totalText.textContent = `Inject at flare roots at 20–30 psi per label.`;
-    return;
-  }
-
-  // fallback
-  results.style.display = "none";
+  // default
+  doseText.textContent = "Calculator for this product not fully defined here.";
+  waterText.textContent = "";
+  totalText.textContent = "";
 }
 
-/* ========== EVENT WIRES FOR DOSE INPUTS ========== */
+/* 12. listeners */
 document.getElementById("species").addEventListener("change", calcCambistat);
 document.getElementById("dbhCambistat").addEventListener("input", calcCambistat);
 document.getElementById("dbh").addEventListener("input", computeCurrentProduct);
 document.getElementById("method").addEventListener("change", computeCurrentProduct);
 document.getElementById("pest").addEventListener("change", computeCurrentProduct);
 document.getElementById("sprayVol").addEventListener("input", computeCurrentProduct);
-
-/* init */
-populateSpecies();
 </script>
 </body>
 </html>
+
