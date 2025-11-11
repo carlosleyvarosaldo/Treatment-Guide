@@ -784,15 +784,16 @@ function computeCurrentProduct(){
   const product = document.getElementById("product").value;
   const cfg = productConfig[product];
   if (!cfg) return;
+
   const doseText = document.getElementById("doseText");
   const waterText = document.getElementById("waterText");
   const totalText = document.getElementById("totalText");
   showSection("results", true);
 
-  // Cambistat handled separately
+  // Cambistat handled elsewhere
   if (cfg.showCambistat) return;
 
-  // xytect2f / xytect10 style soil / injection
+  // 1) Xytect soil products
   if (product === "xytect2f" || product === "xytect10") {
     const dbh = parseFloat(document.getElementById("dbh").value || "0");
     const pestId = document.getElementById("pest").value;
@@ -800,10 +801,10 @@ function computeCurrentProduct(){
     const chosen = (cfg.pests || [])[0];
     const rateObj = (cfg.pests || []).find(p=>p.id===pestId) || chosen;
 
-    // xytect10 here we’ll just treat like 2F for math
     const mlPerIn = (rateObj.rateFlOz || 0.15) * 29.5735;
     const productMl = mlPerIn * dbh;
     let waterMl;
+
     if (method === "Soil injection") {
       const gals = Math.max(1, dbh * 1);
       waterMl = gallonsToMl(gals);
@@ -813,12 +814,13 @@ function computeCurrentProduct(){
       waterMl = gallonsToMl(gals);
       waterText.textContent = `Water: ${formatMl(waterMl)} mL (example 2 gal drench)`;
     }
+
     doseText.textContent = `Product: ${formatMl(productMl)} mL ${cfg.name} at ${rateObj.rateFlOz || 0.15} fl oz/in × ${dbh} in`;
     totalText.textContent = `Total mix: ${formatMl(productMl + waterMl)} mL`;
     return;
   }
 
-  // trunk fungicides / phosphites (alamo, reliant)
+  // 2) Alamo / Reliant (ml per inch, dilute to 1 L per inch)
   if (product === "alamo" || product === "reliant") {
     const dbh = parseFloat(document.getElementById("dbh").value || "0");
     const pestId = document.getElementById("pest").value;
@@ -832,7 +834,7 @@ function computeCurrentProduct(){
     return;
   }
 
-  // Transtect 70 WSP
+  // 3) Transtect 70 WSP
   if (product === "transtect70") {
     const dbh = parseFloat(document.getElementById("dbh").value || "0");
     const method = document.getElementById("method").value;
@@ -850,13 +852,13 @@ function computeCurrentProduct(){
     return;
   }
 
-  // injection insecticides (transtectInfusible, lepitect, mectinite)
+  // 4) Injection insecticides
   if (product === "transtectInfusible" || product === "lepitect" || product === "mectinite") {
     const dbh = parseFloat(document.getElementById("dbh").value || "0");
     let perIn;
     if (product === "transtectInfusible") perIn = dbh < 12 ? 2 : (dbh < 24 ? 4 : 6);
-    if (product === "lepitect") perIn = dbh < 12 ? 4 : (dbh < 24 ? 6 : 8);
-    if (product === "mectinite") perIn = dbh < 12 ? 4 : (dbh < 24 ? 8 : 10);
+    if (product === "lepitect")           perIn = dbh < 12 ? 4 : (dbh < 24 ? 6 : 8);
+    if (product === "mectinite")          perIn = dbh < 12 ? 4 : (dbh < 24 ? 8 : 10);
     const productMl = perIn * dbh;
     doseText.textContent = `Product: ${formatMl(productMl)} mL ${cfg.name} (${perIn} mL/in × ${dbh} in).`;
     waterText.textContent = `Water: per injection device / label (enough to deliver).`;
@@ -864,25 +866,48 @@ function computeCurrentProduct(){
     return;
   }
 
-  // spray products (myclotect, proxite, bifenamite2sc, diamid, junction, scrimmage, abamectin015, onmark, biorush)
+  // 5) **Trimtect** — this is the one you wanted
+  if (product === "trimtect") {
+    const dbh = parseFloat(document.getElementById("dbh").value || "0");
+    const method = document.getElementById("method").value;
+    // placeholder rate — swap for your exact label rate if different
+    const productMl = 3 * dbh; // 3 mL per inch
+    let waterMl;
+
+    if (method === "Soil injection") {
+      const gals = Math.max(1.5, dbh * 0.25);
+      waterMl = gallonsToMl(gals);
+      waterText.textContent = `Water: ${formatMl(waterMl)} mL (≈ ${gals.toFixed(1)} gal)`;
+    } else {
+      const gals = 1.5;
+      waterMl = gallonsToMl(gals);
+      waterText.textContent = `Water: ${formatMl(waterMl)} mL (example drench volume)`;
+    }
+
+    doseText.textContent = `Product: ${formatMl(productMl)} mL Trimtect (3 mL/in × ${dbh} in)`;
+    totalText.textContent = `Total: ${formatMl(productMl + waterMl)} mL`;
+    return;
+  }
+
+  // 6) Spray products
   if (cfg.showSpray) {
     const sprayGal = parseFloat(document.getElementById("sprayVol").value || "0");
     const pestId = document.getElementById("pest").value;
     const chosen = (cfg.pests || [])[0];
     const p = (cfg.pests || []).find(x=>x.id===pestId) || chosen;
 
-    // Onmark special
+    // Onmark
     if (product === "onmark") {
       const pct = p ? p.percent : 1;
       const totalMl = gallonsToMl(sprayGal);
-      const productMl = totalMl * (pct/100);
+      const productMl = totalMl * (pct / 100);
       doseText.textContent = `Product: ${formatMl(productMl)} mL Onmark for ${sprayGal} gal at ${pct}% solution.`;
       waterText.textContent = `Water: to ${sprayGal} gal.`;
       totalText.textContent = `Spray to wet target weeds.`;
       return;
     }
 
-    // Biorush special
+    // Biorush
     if (product === "biorush") {
       const lb = (1/50) * sprayGal;
       const grams = lbToGrams(lb);
@@ -892,7 +917,7 @@ function computeCurrentProduct(){
       return;
     }
 
-    // Junction special (use 1.5 lb/100 gal example)
+    // Junction
     if (product === "junction") {
       const lbPer100 = 1.5;
       const neededLb = lbPer100 * (sprayGal / 100);
@@ -903,7 +928,7 @@ function computeCurrentProduct(){
       return;
     }
 
-    // default fl oz / 100 gal
+    // everything else spray: fl oz / 100 gal
     const rate = (p && p.rateFlOzPer100) ? p.rateFlOzPer100 : 8;
     const neededFlOz = rate * (sprayGal / 100);
     const productMl = neededFlOz * 29.5735;
@@ -913,7 +938,7 @@ function computeCurrentProduct(){
     return;
   }
 
-  // MoistureAide
+  // 7) MoistureAide
   if (product === "moistureaide") {
     const dbh = parseFloat(document.getElementById("dbh").value || "0");
     const method = document.getElementById("method").value;
@@ -923,57 +948,20 @@ function computeCurrentProduct(){
       const gals = 5 * dbh;
       const waterMl = gallonsToMl(gals);
       doseText.textContent = `Product: ${formatMl(productMl)} mL MoistureAide (${flOzPerIn} fl oz/in × ${dbh} in).`;
-      waterText.textContent = `Water: ${formatMl(waterMl)} mL (≈ ${gals.toFixed(1)} gal) to inject around root zone.`;
-      totalText.textContent = `Total: ${formatMl(productMl+waterMl)} mL.`;
+      waterText.textContent = `Water: ${formatMl(waterMl)} mL (≈ ${gals.toFixed(1)} gal)`;
+      totalText.textContent = `Total: ${formatMl(productMl + waterMl)} mL`;
     } else {
       const gals = 2;
       const waterMl = gallonsToMl(gals);
       doseText.textContent = `Product: ${formatMl(productMl)} mL MoistureAide.`;
       waterText.textContent = `Water: ${formatMl(waterMl)} mL (example drench).`;
-      totalText.textContent = `Total: ${formatMl(productMl+waterMl)} mL.`;
+      totalText.textContent = `Total: ${formatMl(productMl + waterMl)} mL`;
     }
-    return;
-  }
-  // Trimtect (simple example rate)
-  if (product === "trimtect") {
-    const dbh = parseFloat(document.getElementById("dbh").value || "0");
-    const method = document.getElementById("method").value;
-    // example: 3 mL per inch DBH
-    const productMl = 3 * dbh;
-    let waterMl;
-    if (method === "Soil injection") {
-      // more water for injection
-      const gals = Math.max(1.5, dbh * 0.25);
-      waterMl = gallonsToMl(gals);
-      document.getElementById("waterText").textContent =
-        `Water: ${formatMl(waterMl)} mL (≈ ${gals.toFixed(1)} gal)`;
-    } else {
-      // simple drench
-      const gals = 1.5;
-      waterMl = gallonsToMl(gals);
-      document.getElementById("waterText").textContent =
-        `Water: ${formatMl(waterMl)} mL (example drench volume)`;
-    }
-    document.getElementById("doseText").textContent =
-      `Product: ${formatMl(productMl)} mL Trimtect (3 mL/in × ${dbh} in)`;
-    document.getElementById("totalText").textContent =
-      `Total: ${formatMl(productMl + waterMl)} mL`;
     return;
   }
 
-  // default
+  // 8) default — only products with no math land here
   doseText.textContent = "Calculator for this product not fully defined here.";
   waterText.textContent = "";
   totalText.textContent = "";
 }
-
-/* listeners */
-document.getElementById("species").addEventListener("change", calcCambistat);
-document.getElementById("dbhCambistat").addEventListener("input", calcCambistat);
-document.getElementById("dbh").addEventListener("input", computeCurrentProduct);
-document.getElementById("method").addEventListener("change", computeCurrentProduct);
-document.getElementById("pest").addEventListener("change", computeCurrentProduct);
-document.getElementById("sprayVol").addEventListener("input", computeCurrentProduct);
-</script>
-</body>
-</html>
