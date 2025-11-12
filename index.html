@@ -10,12 +10,12 @@
     main { max-width:1150px; margin:0 auto; padding:1.5rem; }
     .card { background:#fff; border-radius:12px; padding:1.25rem 1.5rem 1.5rem; box-shadow:0 10px 35px rgba(0,0,0,.05); }
     label { font-weight:600; display:block; margin-bottom:.25rem; }
-    select,input { width:100%; padding:.45rem .55rem; border-radius:8px; border:1px solid #ddd; margin-bottom:.75rem; background:#fff; }
+    select,input { width:100%; padding:.5rem .7rem; border-radius:10px; border:1px solid #ddd; margin-bottom:.75rem; background:#fff; font-size:.9rem; }
     .row { display:flex; gap:1rem; flex-wrap:wrap; }
     .col-4 { flex:1 1 220px; }
     .col-6 { flex:1 1 320px; }
-    .tabs { display:flex; gap:.5rem; margin-top:1rem; margin-bottom:1rem; flex-wrap:wrap; }
-    .tab-btn { border:1px solid #ddd; background:#fff; padding:.4rem .75rem; border-radius:999px; font-size:.8rem; cursor:pointer; }
+    .tabs { display:flex; gap:.6rem; margin-top:1rem; margin-bottom:1rem; flex-wrap:wrap; }
+    .tab-btn { border:1px solid #ddd; background:#fff; padding:.7rem 1.25rem; border-radius:999px; font-size:.9rem; cursor:pointer; font-weight:600; }
     .tab-btn.active { background:#0d6efd; color:#fff; border-color:#0d6efd; }
     .panel { display:none; }
     .panel.active { display:block; }
@@ -29,6 +29,9 @@
     .steps ol { padding-left:1.1rem; }
     .steps li { margin-bottom:.35rem; }
     #productImage { max-width:180px; max-height:180px; object-fit:contain; border-radius:10px; background:#fff; border:1px solid #eee; padding:.4rem; margin-top:.75rem; }
+    .season-note { font-size:.65rem; color:#666; margin-top:-.35rem; margin-bottom:.7rem; }
+    #toolSuggest, #galConvert { margin-top:.4rem; font-size:.72rem; color:#333; }
+    #toolSuggest strong, #galConvert strong { display:block; margin-bottom:.25rem; }
   </style>
 </head>
 <body>
@@ -45,6 +48,7 @@
           <option value="summer">Summer</option>
           <option value="fall">Fall</option>
         </select>
+        <p class="season-note">Season is for convenience. Always follow the product label for timing.</p>
       </div>
       <div class="col-6">
         <label for="product">Product</label>
@@ -124,6 +128,8 @@
         <p id="doseText"></p>
         <p id="waterText"></p>
         <p id="totalText"></p>
+        <div id="galConvert"></div>
+        <div id="toolSuggest"></div>
         <p class="disclaimer">
           Always follow the current specimen label. This tool summarizes rates and PPE and is not a substitute for the label.
         </p>
@@ -140,15 +146,77 @@
 </main>
 
 <script>
-/* seasons → products (with your new ones) */
+/* ---------- CONFIG CONSTANTS ---------- */
+const MACRO_TANK_ML = 10000; // 10 L macro-infusion tank (adjust here)
+const ML_PER_GAL = 3785.41;
+
+/* 1. SEASON LIST (label-ish: injections/systemics in active seasons) */
 const seasonProducts = {
-  winter: ["cambistat","reliant","alamo","moistureaide","trimtect","sightline"],
-  spring: ["xytect2f","xytect10","transtect70","transtectInfusible","proxite","bifenamite2sc","abamectin015","scrimmage","diamid","junction","biorush","reliant","mectinite","lepitect","hortoil","upstargold","bacastat","verdurmn"],
-  summer: ["myclotect","transtect70","transtectInfusible","lepitect","mectinite","moistureaide","onmark","scrimmage","bifenamite2sc","proxite","upstargold","bifenxts","hortoil","sightline"],
-  fall: ["cambistat","xytect2f","alamo","trimtect","junction","moistureaide","reliant","sightline"]
+  winter: [
+    "hortoil",
+    "onmark",
+    "sightline",
+    "scrimmage"
+  ],
+  spring: [
+    "cambistat",
+    "xytect2f",
+    "xytect10",
+    "transtect70",
+    "transtectInfusible",
+    "proxite",
+    "bifenamite2sc",
+    "abamectin015",
+    "scrimmage",
+    "diamid",
+    "junction",
+    "biorush",
+    "mectinite",
+    "lepitect",
+    "moistureaide",
+    "alamo",
+    "reliant",
+    "myclotect",
+    "upstargold",
+    "sightline",
+    "verdurmn",
+    "bacastat",
+    "trimtect"
+  ],
+  summer: [
+    "xytect2f",
+    "xytect10",
+    "transtect70",
+    "transtectInfusible",
+    "proxite",
+    "bifenamite2sc",
+    "abamectin015",
+    "diamid",
+    "junction",
+    "mectinite",
+    "lepitect",
+    "moistureaide",
+    "myclotect",
+    "onmark",
+    "scrimmage",
+    "upstargold",
+    "sightline",
+    "verdurmn",
+    "bacastat"
+  ],
+  fall: [
+    "xytect2f",
+    "transtect70",
+    "reliant",
+    "alamo",
+    "moistureaide",
+    "sightline",
+    "onmark",
+    "trimtect"
+  ]
 };
 
-/* product images */
+/* 2. PRODUCT IMAGES — from your filenames */
 const productImages = {
   "cambistat": "images/RES-Cambistat-Gallon__52689.jpg",
   "abamectin015": "images/RES-Abamectin-015__71348.jpg",
@@ -178,7 +246,7 @@ const productImages = {
   "verdurmn": "images/RES-Verdur-Mn-2023__87706.jpg"
 };
 
-/* cambistat dose table */
+/* 3. CAMBISTAT TABLE (4–47 in) */
 const cambistatData = {
   "4":{"A":{"product":17,"water":185},"B":{"product":23,"water":250},"C":{"product":42,"water":460},"D":{"product":46,"water":510},"E":{"product":50,"water":550},"F":{"product":67,"water":735}},
   "5":{"A":{"product":21,"water":230},"B":{"product":28,"water":310},"C":{"product":52,"water":575},"D":{"product":57,"water":630},"E":{"product":63,"water":690},"F":{"product":83,"water":920}},
@@ -226,38 +294,37 @@ const cambistatData = {
   "47":{"A":{"product":294,"water":3230},"B":{"product":392,"water":4310},"C":{"product":490,"water":5385},"D":{"product":539,"water":5924},"E":{"product":588,"water":6463},"F":{"product":783,"water":8615}}
 };
 
-/* species map from your table */
+/* 4. SPECIES → CATEGORY (from your table) */
 const speciesToCategory = {
   "Acacia":"F","Ailanthus":"D","Alder":"F","Anaqua":"E","Arborvitae":"F","Ash":"F","Aspen":"F","Australian Bottle":"C","Australian Pine":"A","Bald Cypress":"F","Banyan - Ficus":"F","Basswood, American":"A","Baytree":"E","Beech":"E","Birch":"F","Bischofia":"F","Black Gum / Tupelo":"B","Black Olive":"F","Bottlebrush":"F","Boxelder":"A","Buckeye":"D","Buttonwood":"F","California Pepper":"C","Camphor":"E","Catalpa":"E","Cedar – Deodora":"E","Cedar - all others":"F","Cherry - Black":"F","Cherry - Ornamental":"E","Cherry - Laurel":"E","Chinaberry":"E","Chinese Pistache":"E","Cottonwood*":"F","Crabapple":"F","Crape Myrtle":"B","Cryptomeria":"F","Cypress":"B","Ebony - Texas":"F","Elm - Cedar":"B","Elm - Chinese/Lacebark":"A","Elm - Siberian":"A","Elm - (all others)":"B","Eucalyptus":"F","Ficus":"F","Fir":"F","Ginkgo":"F","Gumbo Limbo":"F","Hackberry":"F","Hawthorn":"C","Hickory":"E","Holly - American":"E","Holly – Nellie Stevens":"E","Holly - Yaupon":"B","Horsechestnut":"C","Huisache":"E","Ironwood / Hornbeam":"D","Jacaranda":"F","Japanese Tree Lilac":"E","Juniper":"F","Katsura - Japanese":"A","Larch":"F","Laurel":"F","Leyland Cypress":"F","Linden":"A","Locust - Black":"F","Locust - Honey":"E","Lombardy Poplar":"F","Lysiloma":"F","Magnolia":"F","Mahogany":"F","Maple - Amur":"B","Maple - Bigleaf":"D","Maple - Japanese (caution)**":"A","Maple - Norway":"B","Maple - Red":"B","Maple - Silver":"D","Maple - Sugar":"B","Melaleuca":"F","Mesquite":"F","Mimosa":"E","Mountain Ash":"B","Mulberry":"F","Oak – Black":"E","Oak – Blackjack":"E","Oak – Bur":"D","Oak - Laurel":"F","Oak - Live (<10”)":"B","Oak - Live (>10”)":"E","Oak - Pin":"E","Oak - Post":"E","Oak - Red":"E","Oak - Sand Shinnery":"E","Oak - Scarlet":"E","Oak - Shumard":"E","Oak - Valley":"F","Oak - Water":"E","Oak - White":"D","Oak - Willow":"E","Olive - Black":"F","Olive - European":"E","Olive - Russian":"E","Orchid Tree - Hong Kong":"C","Osage Orange":"F","Palms":"F","Paloverde":"E","Paulownia":"E","Pear - Ornamental":"F","Pecan":"E","Persimmon":"C","Photinia":"E","Pines*":"F","Plum - Ornamental":"E","Poinciana":"F","Raintree - Golden":"F","Redcedar - Eastern":"F","Redwood":"F","Rosewood / Tipuana":"C","Russian Olive":"E","Saltcedar":"F","Sassafrass":"E","Sea Grape":"E","Soapberry":"E","Spruce*":"F","Sugarberry / So. Hackberry":"F","Sumac - African":"E","Sycamore":"F","Tabebuia":"F","Tallow - Chinese":"F","Tallowwood":"F","Tamarisk":"F","Tepeguaje":"E","Tulip / Yellow Poplar":"F","Tupelo / Black Gum":"B","Walnut":"E","Waxmyrtle - Pacific":"F","Willow":"F","Xylosma":"C","Yellow Poplar / Tulip":"F","Yew":"F","Zelkova":"B"
 };
 
-/* product configs */
+/* 5. PRODUCT CONFIG — ALL PRODUCTS */
 const productConfig = {
   /* Cambistat */
   cambistat: {
     name: "Cambistat",
     showCambistat: true,
     labelUrl: "labels/Cambistat%20Label.pdf",
-    use: "Use: Growth regulator — use species category A–F + DBH to find exact dose and water.",
-    ppe: "PPE:\n• Long-sleeved shirt and long pants\n• Chemical-resistant gloves\n• Shoes plus socks\n• Eye/face protection if splash hazard",
+    use: "Growth regulator. Use DBH 4–47 in table + species category.",
+    ppe: "PPE:\n• Long-sleeved shirt & long pants\n• Chemical-resistant gloves\n• Shoes plus socks\n• Eye/face protection if splash",
     applicationSteps: {
       "Soil drench": [
-        "1. Measure DBH and find dose (mL product + mL water) in the Cambistat table.",
-        "2. Add the product to a bucket or tank with some water in it.",
-        "3. Add the rest of the water to reach the table volume; mix well.",
-        "4. Pour as a band around the root flare.",
-        "5. Light irrigation if soil is dry.",
-        "6. Rinse equipment."
+        "1. Look up mL product + mL water in table.",
+        "2. Mix in bucket/tank.",
+        "3. Pour band around root flare.",
+        "4. Lightly water in if dry.",
+        "5. Rinse equipment."
       ],
       "Soil injection": [
-        "1. Measure DBH and look up the table dose.",
-        "2. Put product + water into your injection tank.",
-        "3. Make 6–12 injection points evenly around the root flare.",
-        "4. Inject 2–8 in from the trunk at low pressure.",
-        "5. Continue until all solution is injected.",
-        "6. Rinse injection lines."
+        "1. Look up mL product + mL water in table.",
+        "2. Put solution in soil injector.",
+        "3. Make 6–12 holes evenly around flare.",
+        "4. Inject at low pressure.",
+        "5. Rinse equipment."
       ]
-    }
+    },
+    rainbowTool: "Soil Injection System / Cambistat kit"
   },
 
   /* Xytect 2F */
@@ -270,52 +337,52 @@ const productConfig = {
     pests: [
       {id:"standard", label:"Standard labeled insects – 0.15 fl oz/in DBH", rateFlOz:0.15},
       {id:"heavy", label:"Higher pressure – 0.3 fl oz/in DBH", rateFlOz:0.3},
-      {id:"max", label:"Do not exceed label max – 0.4 fl oz/in DBH", rateFlOz:0.4}
+      {id:"max", label:"Do not exceed – 0.4 fl oz/in DBH", rateFlOz:0.4}
     ],
-    use: "Use: Systemic imidacloprid for scales, aphids, adelgids, some borers.",
+    use: "Systemic imidacloprid for ornamental insects.",
     ppe: "PPE:\n• Long sleeves, long pants\n• Chemical-resistant gloves\n• Shoes plus socks",
     applicationSteps: {
       "Soil injection": [
-        "1. Measure DBH and calculate product (fl oz) from chosen rate.",
-        "2. Dilute in enough water to make injections easy.",
-        "3. Make injection holes 2–8 in from trunk, evenly spaced.",
-            "4. Inject at low pressure.",
-        "5. Apply full volume around the tree.",
-        "6. Do not exceed annual max rate."
+        "1. Measure DBH and calculate fl oz.",
+        "2. Dilute in enough water (1–5 gal).",
+        "3. Inject 2–8 in from trunk at even spacing.",
+        "4. Keep pressure low.",
+        "5. Rinse lines."
       ],
       "Soil drench": [
-        "1. Measure DBH and calculate dose.",
-        "2. Add product to a bucket with at least 1–2 gal of water.",
-        "3. Pour slowly in a band around the base.",
-        "4. Avoid runoff/puddling.",
-        "5. Rinse container and obey REI."
+        "1. Measure DBH and calculate fl oz.",
+        "2. Mix in 1–2 gal water.",
+        "3. Pour in band around trunk.",
+        "4. Avoid runoff.",
+        "5. Rinse container."
       ]
-    }
+    },
+    rainbowTool: "Soil Injection System / Q-Spray"
   },
 
-  /* Xytect 10 Injection */
+  /* Xytect 10% (trunk) */
   xytect10: {
-    name: "Xytect 10% (injection)",
+    name: "Xytect 10% (Injection)",
     showDBH: true,
     showMethods: true,
     labelUrl: "labels/Xytect%2010_%20Insecticide%20Label.pdf",
     methods: ["Trunk injection"],
     pests: [
-      {id:"soft", label:"Soft-bodied pests (lower band)"},
-      {id:"borer", label:"Borers / EAB (upper band)"}
+      {id:"soft", label:"Soft-bodied / lower band"},
+      {id:"borer", label:"Borers / EAB / upper band"}
     ],
-    use: "Use: High concentration imidacloprid for trunk injection when soil/pour not possible.",
-    ppe: "PPE:\n• Long sleeves, long pants\n• Chemical-resistant gloves\n• Eye protection",
+    use: "High-load imidacloprid trunk injection.",
+    ppe: "PPE:\n• Long sleeves, long pants\n• Chemical-resistant gloves\n• Eye/face protection",
     applicationSteps: {
       "Trunk injection": [
-        "1. Measure DBH and select the appropriate dose.",
-        "2. Expose root flare if needed.",
-        "3. Mark injection sites evenly (every 4–6 in circumference).",
-        "4. Drill per device instructions.",
-        "5. Let the tree take up solution at low pressure.",
-        "6. Remove equipment and clean."
+        "1. Measure DBH.",
+        "2. Mark injection sites evenly.",
+        "3. Drill per device instructions.",
+        "4. Inject at low pressure until dose taken.",
+        "5. Remove equipment and clean."
       ]
-    }
+    },
+    rainbowTool: "Micro-Injection System"
   },
 
   /* Transtect 70WSP */
@@ -326,30 +393,28 @@ const productConfig = {
     labelUrl: "labels/Transtect%20Label.pdf",
     methods: ["Soil drench","Soil injection","Bark spray (label)"],
     pests: [{id:"general", label:"General labeled insects (per packet chart)", ratePackets:1}],
-    use: "Use: Dinotefuran, fast uptake, flexible applications.",
+    use: "Dinotefuran — fast uptake, multiple methods.",
     ppe: "PPE:\n• Long sleeves, long pants\n• Chemical-resistant gloves\n• Shoes plus socks",
     applicationSteps: {
       "Soil drench": [
-        "1. Determine packets needed by DBH.",
-        "2. Dissolve packet(s) fully in water.",
-        "3. Pour around root flare.",
-        "4. Avoid runoff.",
-        "5. Rinse equipment."
+        "1. Dissolve packet(s) in water.",
+        "2. Pour at base of tree.",
+        "3. Avoid runoff.",
+        "4. Rinse equipment."
       ],
       "Soil injection": [
         "1. Dissolve packet(s) in tank.",
-        "2. Make several injection points around tree.",
-        "3. Inject at low pressure into upper root zone.",
-        "4. Apply full volume.",
-        "5. Clean tank/lines."
+        "2. Inject evenly around flare.",
+        "3. Low pressure.",
+        "4. Rinse lines."
       ],
       "Bark spray (label)": [
-        "1. Mix packet(s) in water at label dilution.",
-        "2. Spray trunk/bark to wet.",
-        "3. Avoid off-target.",
-        "4. Let dry and obey REI."
+        "1. Mix as per label.",
+        "2. Spray trunk to wet.",
+        "3. Avoid off-target."
       ]
-    }
+    },
+    rainbowTool: "Soil Injection System / Drench kit"
   },
 
   /* Transtect Infusible */
@@ -359,18 +424,18 @@ const productConfig = {
     showMethods: true,
     labelUrl: "labels/TranstectInfusibleLabel.pdf",
     methods: ["Trunk injection"],
-    use: "Use: Injectable dinotefuran.",
+    use: "Injectable dinotefuran.",
     ppe: "PPE:\n• Long sleeves, long pants\n• Chemical-resistant gloves\n• Eye/face protection",
     applicationSteps: {
       "Trunk injection": [
-        "1. Measure DBH and calculate total mL.",
-        "2. Set up injection system.",
-        "3. Place injection sites evenly around root flare.",
+        "1. Measure DBH.",
+        "2. Prepare injection solution.",
+        "3. Place injection sites around root flare.",
         "4. Inject at device pressure.",
-        "5. Continue until dose is delivered.",
-        "6. Rinse and dispose per label."
+        "5. Clean equipment."
       ]
-    }
+    },
+    rainbowTool: "Micro-Injection / Infusible kit"
   },
 
   /* Trimtect */
@@ -380,24 +445,25 @@ const productConfig = {
     showMethods: true,
     labelUrl: "labels/Trimtect%20Label.pdf",
     methods: ["Basal/soil drench","Soil injection"],
-    use: "Use: Tree/shrub growth regulator.",
+    use: "Tree/shrub growth regulator.",
     ppe: "PPE:\n• Long sleeves, long pants\n• Chemical-resistant gloves\n• Shoes plus socks",
     applicationSteps: {
       "Basal/soil drench": [
-        "1. Measure DBH and determine mL needed.",
+        "1. Measure DBH.",
         "2. Mix Trimtect in water.",
         "3. Apply slowly around base.",
         "4. Keep off hardscape.",
         "5. Rinse container."
       ],
       "Soil injection": [
-        "1. Measure DBH and calculate dose.",
-        "2. Put Trimtect + water in injection tank.",
-        "3. Make multiple injections around root flare.",
-        "4. Inject at low pressure.",
-        "5. Continue until entire volume is placed."
+        "1. Measure DBH.",
+        "2. Put solution in injection tank.",
+        "3. Inject evenly around flare.",
+        "4. Low pressure.",
+        "5. Rinse equipment."
       ]
-    }
+    },
+    rainbowTool: "Soil Injection System"
   },
 
   /* Reliant */
@@ -410,24 +476,25 @@ const productConfig = {
     pests: [
       {id:"disease", label:"Label disease rate – 10 mL/in, dilute 1 L/in", rateMlPerIn:10, waterLPerIn:1}
     ],
-    use: "Use: Phosphite systemic for some tree diseases.",
+    use: "Phosphite systemic for certain diseases.",
     ppe: "PPE:\n• Long sleeves, long pants\n• Chemical-resistant gloves\n• Eye protection",
     applicationSteps: {
       "Trunk injection": [
-        "1. Measure DBH and multiply by label mL/in.",
-        "2. Dilute to about 1 L per inch.",
-        "3. Drill injection holes around root flare.",
-        "4. Connect injection equipment and deliver solution.",
-        "5. Plug/close holes if directed.",
+        "1. Measure DBH.",
+        "2. Multiply mL/in × DBH.",
+        "3. Dilute to about 1 L/in.",
+        "4. Drill injection sites around flare.",
+        "5. Inject at low pressure.",
         "6. Clean equipment."
       ],
       "Soil drench": [
-        "1. Mix Reliant in water to label dilution.",
-        "2. Pour evenly around tree base.",
+        "1. Mix Reliant in water.",
+        "2. Pour around base.",
         "3. Avoid runoff.",
-        "4. Repeat only at labeled intervals."
+        "4. Repeat only at label intervals."
       ]
-    }
+    },
+    rainbowTool: "Macro-Infusion or Q-Connect (dilute phosphite)"
   },
 
   /* Proxite */
@@ -439,17 +506,17 @@ const productConfig = {
       {id:"ornLow", label:"Ornamentals – 8 fl oz / 100 gal", rateFlOzPer100: 8},
       {id:"ornHigh", label:"Heavy – 16 fl oz / 100 gal", rateFlOzPer100: 16}
     ],
-    use: "Use: IGR for certain insect stages on ornamentals.",
+    use: "IGR for some ornamentals.",
     ppe: "PPE:\n• Long sleeves, long pants\n• Chemical-resistant gloves\n• Shoes plus socks",
     applicationSteps: {
       "Spray": [
-        "1. Add water to spray tank to 1/2.",
-        "2. Add Proxite at labeled rate.",
-        "3. Agitate and top off.",
-        "4. Spray to thorough coverage.",
-        "5. Respect label REI."
+        "1. Fill tank 1/2.",
+        "2. Add Proxite.",
+        "3. Top off with water.",
+        "4. Spray to coverage."
       ]
-    }
+    },
+    rainbowTool: "Spray rig / backpack"
   },
 
   /* Myclotect */
@@ -461,20 +528,21 @@ const productConfig = {
       {id:"foliar", label:"Foliar diseases – 6 fl oz / 100 gal", rateFlOzPer100: 6},
       {id:"higher", label:"Heavier disease – 12 fl oz / 100 gal", rateFlOzPer100: 12}
     ],
-    use: "Use: Fungicide for ornamental foliar diseases.",
+    use: "Fungicide for ornamentals.",
     ppe: "PPE:\n• Long sleeves, long pants\n• Chemical-resistant gloves\n• Eye protection",
     applicationSteps: {
       "Spray": [
         "1. Fill tank 1/2 with water.",
-        "2. Add Myclotect at desired rate.",
+        "2. Add Myclotect at rate.",
         "3. Agitate and top off.",
-        "4. Spray foliage to cover.",
-        "5. Follow re-application and REI."
+        "4. Spray to cover.",
+        "5. Follow re-entry."
       ]
-    }
+    },
+    rainbowTool: "Spray rig / backpack"
   },
 
-  /* Onmark */
+  /* Onmark Herbicide */
   onmark: {
     name: "Onmark Herbicide",
     showSpray: true,
@@ -483,77 +551,79 @@ const productConfig = {
       {id:"1pct", label:"1% solution", percent:1},
       {id:"2pct", label:"2% solution", percent:2}
     ],
-    use: "Use: Directed herbicide on labeled brush/weeds.",
+    use: "Directed herbicide on labeled weeds/brush.",
     ppe: "PPE:\n• Long sleeves, long pants\n• Chemical-resistant gloves\n• Eye protection\n• Shoes plus socks",
     applicationSteps: {
       "Spray": [
         "1. Decide final spray volume.",
-        "2. Add enough Onmark to make 1–2% solution.",
-        "3. Fill remainder with water, agitate.",
-        "4. Spray target plants to wet.",
-        "5. Triple-rinse equipment."
+        "2. Add Onmark to make 1–2% solution.",
+        "3. Fill with water, agitate.",
+        "4. Spray target.",
+        "5. Triple rinse."
       ]
-    }
+    },
+    rainbowTool: "Backpack / spray rig"
   },
 
   /* Bifenamite 2SC */
   bifenamite2sc: {
     name: "Bifenamite 2SC",
     showSpray: true,
-    labelUrl: "labels/Bifenamite%202SC%20Label.pdf",
+    labelUrl: "labels/Bifenamite%202SC%20Speciman%20Label.pdf",
     pests: [
       {id:"mitesLow", label:"Mites – 8 fl oz / 100 gal", rateFlOzPer100: 8},
       {id:"mitesHigh", label:"Mites (heavy) – 16 fl oz / 100 gal", rateFlOzPer100: 16}
     ],
-    use: "Use: Miticide for ornamental mites.",
+    use: "Miticide for ornamental mites.",
     ppe: "PPE:\n• Long sleeves, long pants\n• Chemical-resistant gloves\n• Shoes plus socks",
     applicationSteps: {
       "Spray": [
         "1. Add water to tank, start agitation.",
-        "2. Add Bifenamite 2SC at labeled rate.",
+        "2. Add Bifenamite 2SC.",
         "3. Top off with water.",
-        "4. Spray to thorough coverage.",
-        "5. Observe REI."
+        "4. Spray to coverage."
       ]
-    }
+    },
+    rainbowTool: "Spray rig / backpack"
   },
 
-  /* BIORUSH */
+  /* BIORUSH PLUS 3-0-11 */
   biorush: {
     name: "Biorush Plus 3-0-11",
     showSpray: true,
     labelUrl: "labels/BIORUSH%20PLUS%203-0-11%20Specimen%20Label.pdf",
-    use: "Use: Nutritional/soil amendment — often 1 lb per 50 gal.",
+    use: "Nutritional / soil amendment.",
     ppe: "PPE:\n• Long sleeves, long pants\n• Gloves when handling dry material\n• Shoes plus socks",
     applicationSteps: {
       "Spray": [
-        "1. Measure correct weight of Biorush.",
-        "2. Add to tank with water while agitating.",
-        "3. Apply evenly.",
+        "1. Add Biorush to water.",
+        "2. Agitate.",
+        "3. Apply to target area.",
         "4. Rinse equipment."
       ]
-    }
+    },
+    rainbowTool: "Spray rig / drench"
   },
 
   /* Diamid */
   diamid: {
     name: "Diamid",
     showSpray: true,
-    labelUrl: "labels/Diamid%20Label.pdf",
+    labelUrl: "labels/Diamid%20Specimen%20Label.pdf",
     pests: [
       {id:"orn", label:"Ornamentals – 8 fl oz / 100 gal", rateFlOzPer100: 8}
     ],
-    use: "Use: Insecticide on ornamentals.",
+    use: "Insecticide on ornamentals.",
     ppe: "PPE:\n• Long sleeves, long pants\n• Chemical-resistant gloves\n• Shoes plus socks",
     applicationSteps: {
       "Spray": [
         "1. Fill spray tank 1/2.",
-        "2. Add Diamid at labeled rate.",
+        "2. Add Diamid.",
         "3. Agitate and top off.",
-        "4. Spray to uniform coverage.",
-        "5. Follow REI."
+        "4. Spray to uniform coverage."
       ]
-    }
+    },
+    rainbowTool: "Spray rig / backpack"
   },
 
   /* Junction */
@@ -561,17 +631,17 @@ const productConfig = {
     name: "Junction DF",
     showSpray: true,
     labelUrl: "labels/Junction_Speciman_Label.pdf",
-    use: "Use: Copper + mancozeb fungicide/bactericide.",
+    use: "Copper + mancozeb fungicide/bactericide.",
     ppe: "PPE:\n• Long sleeves, long pants\n• Chemical-resistant gloves\n• Eye protection\n• Shoes plus socks",
     applicationSteps: {
       "Spray": [
         "1. Add water to tank.",
-        "2. Add Junction DF slowly while agitating.",
-        "3. Keep agitation on.",
-        "4. Spray to cover foliage.",
-        "5. Observe REI and copper restrictions."
+        "2. Add Junction while agitating.",
+        "3. Keep agitation.",
+        "4. Spray to cover foliage."
       ]
-    }
+    },
+    rainbowTool: "Spray rig / backpack"
   },
 
   /* Lepitect Infusible */
@@ -581,17 +651,18 @@ const productConfig = {
     showMethods: true,
     labelUrl: "labels/Lepitect%20Infusible%20Specimen%20Label.pdf",
     methods: ["Trunk injection"],
-    use: "Use: Injection acephate for leaf feeders.",
+    use: "Injection acephate for leaf feeders.",
     ppe: "PPE:\n• Long sleeves, long pants\n• Chemical-resistant gloves\n• Eye/face protection",
     applicationSteps: {
       "Trunk injection": [
-        "1. Measure DBH to find total mL.",
-        "2. Prepare injection solution.",
-        "3. Make injection sites evenly spaced.",
+        "1. Measure DBH.",
+        "2. Prepare correct mL.",
+        "3. Make injection sites evenly.",
         "4. Inject at low pressure.",
         "5. Clean equipment."
       ]
-    }
+    },
+    rainbowTool: "Micro-Injection / Infusible kit"
   },
 
   /* Mectinite */
@@ -599,19 +670,20 @@ const productConfig = {
     name: "Mectinite",
     showDBH: true,
     showMethods: true,
-    labelUrl: "labels/Mectinite%20Label.pdf",
+    labelUrl: "labels/Mectinite%20Specimen%20Label.pdf",
     methods: ["Trunk injection"],
-    use: "Use: Emamectin benzoate injection for borers / EAB.",
+    use: "Emamectin benzoate injection.",
     ppe: "PPE:\n• Long sleeves, long pants\n• Chemical-resistant gloves\n• Eye protection",
     applicationSteps: {
       "Trunk injection": [
-        "1. Measure DBH and find mL per inch.",
-        "2. Prepare solution.",
-        "3. Drill/place injection sites around flare.",
+        "1. Measure DBH.",
+        "2. Calculate mL per inch.",
+        "3. Drill injection sites.",
         "4. Inject slowly.",
         "5. Rinse lines."
       ]
-    }
+    },
+    rainbowTool: "Macro-Infusion for EB / Micro-Injection"
   },
 
   /* MoistureAide */
@@ -619,24 +691,25 @@ const productConfig = {
     name: "MoistureAide",
     showDBH: true,
     showMethods: true,
-    labelUrl: "labels/MoistureAide%20Label.pdf",
+    labelUrl: "labels/MoistureAide%20Speciman%20Label.pdf",
     methods: ["Soil drench","Soil injection"],
-    use: "Use: Wetting/conditioning around root zone.",
+    use: "Wetting/conditioning agent.",
     ppe: "PPE:\n• Long sleeves, long pants\n• Chemical-resistant gloves\n• Shoes plus socks",
     applicationSteps: {
       "Soil drench": [
         "1. Mix MoistureAide in water.",
-        "2. Pour evenly over root zone.",
+        "2. Pour over root zone.",
         "3. Avoid runoff.",
         "4. Rinse equipment."
       ],
       "Soil injection": [
-        "1. Mix product in injection tank.",
+        "1. Mix in injection tank.",
         "2. Make multiple injection points.",
-        "3. Inject at label depth/pressure.",
+        "3. Inject at label depth.",
         "4. Clean equipment."
       ]
-    }
+    },
+    rainbowTool: "Soil Injection System / Drench kit"
   },
 
   /* Scrimmage */
@@ -648,17 +721,18 @@ const productConfig = {
       {id:"withPesticide", label:"With insecticide/fungicide – 16 fl oz/100 gal", rateFlOzPer100: 16},
       {id:"withHerbicide", label:"With herbicide – 32 fl oz/100 gal", rateFlOzPer100: 32}
     ],
-    use: "Use: Adjuvant to improve spray coverage (only if main label allows).",
+    use: "Adjuvant to improve spray coverage (if allowed).",
     ppe: "PPE:\n• Long sleeves, long pants\n• Chemical-resistant gloves\n• Shoes plus socks",
     applicationSteps: {
       "Spray": [
-        "1. Start with water and agitation.",
-        "2. Add Scrimmage 03F at adjuvant rate.",
-        "3. Add the pesticide/herbicide.",
-        "4. Keep agitating and spray.",
-        "5. Rinse tank and lines."
+        "1. Water in tank, agitation on.",
+        "2. Add Scrimmage.",
+        "3. Add pesticide/herbicide.",
+        "4. Spray.",
+        "5. Rinse tank."
       ]
-    }
+    },
+    rainbowTool: "Spray rig / backpack"
   },
 
   /* Abamectin 0.15 */
@@ -668,19 +742,19 @@ const productConfig = {
     labelUrl: "labels/Abamectin%20Label.pdf",
     pests: [
       {id:"ornLow", label:"Ornamentals – 8 fl oz/100 gal", rateFlOzPer100: 8},
-      {id:"ornHigh", label:"Higher pressure – 16 fl oz/100 gal", rateFlOzPer100: 16}
+      {id:"ornHigh", label:"Heavier pressure – 16 fl oz/100 gal", rateFlOzPer100: 16}
     ],
-    use: "Use: Miticide/insecticide on ornamentals.",
+    use: "Miticide/insecticide on ornamentals.",
     ppe: "PPE:\n• Long sleeves, long pants\n• Chemical-resistant gloves\n• Shoes plus socks",
     applicationSteps: {
       "Spray": [
-        "1. Fill tank 1/2 with water.",
-        "2. Add Abamectin at labeled rate.",
-        "3. Top off with water and agitate.",
-        "4. Spray to good coverage.",
-        "5. Obey REI."
+        "1. Fill tank 1/2.",
+        "2. Add Abamectin.",
+        "3. Top off, agitate.",
+        "4. Spray foliage."
       ]
-    }
+    },
+    rainbowTool: "Spray rig / backpack"
   },
 
   /* Alamo */
@@ -688,28 +762,29 @@ const productConfig = {
     name: "Alamo (propiconazole)",
     showDBH: true,
     showMethods: true,
-    labelUrl: "labels/Alamo%20Label.pdf",
+    labelUrl: "labels/Alamo%20Specimen%20Label.pdf",
     methods: ["Flare-root injection"],
     pests: [
-      {id:"oakWilt", label:"Oak wilt / preventive – 10 mL/in DBH (dilute up to 1 L/in)", rateMlPerIn:10, waterLPerIn:1},
-      {id:"oakWiltHigh", label:"Oak wilt / therapeutic – 20 mL/in DBH (dilute up to 1 L/in)", rateMlPerIn:20, waterLPerIn:1},
-      {id:"dutchElm", label:"Dutch elm disease – 10 mL/in DBH", rateMlPerIn:10, waterLPerIn:1}
+      {id:"oakWiltPrev", label:"Oak wilt – preventive: 10 mL/in, dilute to 1 L/in", rateMlPerIn:10, waterLPerIn:1},
+      {id:"oakWiltTher", label:"Oak wilt – therapeutic: 20 mL/in, dilute to 1 L/in", rateMlPerIn:20, waterLPerIn:1},
+      {id:"dutchElm", label:"Dutch elm disease: 10 mL/in, dilute to 1 L/in", rateMlPerIn:10, waterLPerIn:1}
     ],
-    use: "Use: Systemic fungicide by flare-root injection for oak wilt / DED.",
+    use: "Systemic fungicide by flare-root injection (oak wilt / DED).",
     ppe: "PPE:\n• Long sleeves, long pants\n• Chemical-resistant gloves\n• Eye/face protection\n• Shoes plus socks",
     applicationSteps: {
       "Flare-root injection": [
-        "1. Measure DBH and calculate mL and dilution water.",
-        "2. Expose root flare.",
-        "3. Mark injection sites evenly.",
-        "4. Drill to depth specified.",
-        "5. Inject solution at low pressure.",
-        "6. Remove equipment, plug if needed, record treatment."
+        "1. Measure DBH, choose mL/in from label.",
+        "2. Multiply mL/in × DBH = product mL.",
+        "3. Dilute with water up to 1 L/in.",
+        "4. Expose flare and place multiple injection points.",
+        "5. Use macro-infusion system to deliver entire volume.",
+        "6. Clean system."
       ]
-    }
+    },
+    rainbowTool: "Macro-Infusion System"
   },
 
-  /* Hort Oil (new) */
+  /* Hort Oil */
   hortoil: {
     name: "Hort Oil",
     showSpray: true,
@@ -718,20 +793,20 @@ const productConfig = {
       {id:"2pct", label:"2% solution (heavy scale)", percent:2},
       {id:"1pct", label:"1% solution (maintenance)", percent:1}
     ],
-    use: "Use: horticultural oil for labeled insects/mites/scales on ornamentals.",
+    use: "Horticultural oil for scale/mites.",
     ppe: "PPE:\n• Long sleeves, long pants\n• Chemical-resistant gloves\n• Shoes plus socks\n• Eye protection if splash",
     applicationSteps: {
       "Spray": [
         "1. Fill sprayer 1/2 with water.",
-        "2. Add Hort Oil to make the selected % solution.",
-        "3. Top off while agitating.",
-        "4. Spray to full coverage.",
-        "5. Avoid drought-stressed or very hot conditions."
+        "2. Add Hort Oil to make selected %.",
+        "3. Fill to volume.",
+        "4. Spray to full coverage."
       ]
-    }
+    },
+    rainbowTool: "Spray rig / backpack"
   },
 
-  /* UP-Star Gold (new) */
+  /* UP-Star Gold */
   upstargold: {
     name: "UP-Star Gold",
     showSpray: true,
@@ -740,41 +815,41 @@ const productConfig = {
       {id:"ornLow", label:"Ornamentals – 0.25% spray", percent:0.25},
       {id:"ornHigh", label:"Ornamentals – 0.5% spray", percent:0.5}
     ],
-    use: "Use: bifenthrin insecticide for ornamental pests.",
+    use: "Bifenthrin insecticide for ornamentals.",
     ppe: "PPE:\n• Long sleeves, long pants\n• Chemical-resistant gloves\n• Shoes plus socks\n• Eye/face protection if splash",
     applicationSteps: {
       "Spray": [
-        "1. Determine final spray volume.",
-        "2. Add UP-Star Gold for the % needed.",
-        "3. Agitate and fill to final volume.",
-        "4. Spray to uniform coverage.",
-        "5. Keep people/pets out until dry."
+        "1. Determine final volume.",
+        "2. Add UP-Star Gold for 0.25–0.5%.",
+        "3. Agitate, fill to volume.",
+        "4. Spray to coverage."
       ]
-    }
+    },
+    rainbowTool: "Spray rig / backpack"
   },
 
-  /* Bifen XTS (new) */
+  /* Bifen XTS (no label) */
   bifenxts: {
     name: "Bifen XTS",
     showSpray: true,
     labelUrl: "",
     pests: [
-      {id:"orn", label:"Ornamentals – 1 fl oz / 10 gal (example)", rateFlOzPer100:10}
+      {id:"orn", label:"Ornamental example – 1 fl oz / 10 gal", rateFlOzPer100:10}
     ],
-    use: "Use: high-load bifenthrin for labeled insects (add your label when you have it).",
+    use: "High-load bifenthrin (add real label later).",
     ppe: "PPE:\n• Long sleeves, long pants\n• Chemical-resistant gloves\n• Shoes plus socks",
     applicationSteps: {
       "Spray": [
-        "1. Fill tank 1/2 with water.",
-        "2. Add Bifen XTS at target rate.",
-        "3. Top off with water.",
-        "4. Spray to thorough coverage.",
-        "5. Rinse tank and nozzles."
+        "1. Fill tank 1/2.",
+        "2. Add Bifen XTS.",
+        "3. Top off.",
+        "4. Spray to coverage."
       ]
-    }
+    },
+    rainbowTool: "Spray rig / backpack"
   },
 
-  /* Bacastat (new) */
+  /* Bacastat */
   bacastat: {
     name: "Bacastat",
     showSpray: true,
@@ -782,42 +857,43 @@ const productConfig = {
     pests: [
       {id:"foliar", label:"Foliar – 2 fl oz / gal (example)", rateFlOzPer100:200}
     ],
-    use: "Use: tree/plant health product — adjust to your program.",
+    use: "Tree/plant health product.",
     ppe: "PPE:\n• Long sleeves, long pants\n• Gloves\n• Shoes plus socks",
     applicationSteps: {
       "Spray": [
-        "1. Mix Bacastat in water to the desired program rate.",
-        "2. Agitate until uniform.",
-        "3. Apply to foliage/target area.",
-        "4. Do not overapply."
+        "1. Mix Bacastat in water.",
+        "2. Agitate.",
+        "3. Apply to target.",
+        "4. Rinse."
       ]
-    }
+    },
+    rainbowTool: "Spray rig / drench"
   },
 
-  /* Sightline (new) */
+  /* Sightline */
   sightline: {
     name: "Sightline Herbicide",
     showSpray: true,
     labelUrl: "labels/Sightline%20Label.pdf",
     pests: [
-      {id:"1qt100", label:"1 qt / 100 gal (light brush)", rateFlOzPer100:32},
-      {id:"2qt100", label:"2 qt / 100 gal (heavier brush)", rateFlOzPer100:64}
+      {id:"1qt100", label:"1 qt / 100 gal", rateFlOzPer100:32},
+      {id:"2qt100", label:"2 qt / 100 gal", rateFlOzPer100:64}
     ],
-    use: "Use: brush/broadleaf herbicide — see label for exact species.",
+    use: "Brush/broadleaf control.",
     ppe: "PPE:\n• Coveralls\n• Chemical-resistant gloves\n• Shoes plus socks\n• Protective eyewear",
     applicationSteps: {
       "Spray": [
-        "1. Fill spray tank 1/2 with water.",
+        "1. Fill spray tank 1/2.",
         "2. Add Sightline at 1–2 qt per 100 gal.",
-        "3. Add surfactant if label allows.",
-        "4. Agitate and fill to final volume.",
-        "5. Spray brush to wet, no heavy runoff.",
-        "6. Keep people out until dry."
+        "3. Add surfactant if allowed.",
+        "4. Top off and agitate.",
+        "5. Spray to wet foliage."
       ]
-    }
+    },
+    rainbowTool: "Spray rig / backpack"
   },
 
-  /* Verdur Mn (new) */
+  /* Verdur Mn */
   verdurmn: {
     name: "Verdur Mn",
     showSpray: true,
@@ -825,24 +901,23 @@ const productConfig = {
     pests: [
       {id:"nutrient", label:"Nutritional – 1 gal / 100 gal", rateFlOzPer100:128}
     ],
-    use: "Use: manganese/nutritional supplement for trees/ornamentals.",
+    use: "Manganese/nutritional supplement.",
     ppe: "PPE:\n• Long sleeves, long pants\n• Gloves\n• Shoes plus socks",
     applicationSteps: {
       "Spray": [
         "1. Put water in tank.",
-        "2. Add Verdur Mn at nutrient rate.",
+        "2. Add Verdur Mn.",
         "3. Agitate and fill.",
-        "4. Apply to soil or foliage.",
-        "5. Rinse tank."
+        "4. Apply."
       ]
-    }
+    },
+    rainbowTool: "Spray rig / drench"
   }
 };
 
-/* helpers */
+/* ---------- HELPER FUNCTIONS ---------- */
 function showSection(id, show){ document.getElementById(id).style.display = show ? "" : "none"; }
-function gallonsToMl(g){ return g*3785.41; }
-function lbToGrams(lb){ return lb*453.592; }
+function gallonsToMl(g){ return g*ML_PER_GAL; }
 
 /* populate species */
 function populateSpecies(){
@@ -895,12 +970,35 @@ document.querySelectorAll(".tab-btn").forEach(btn=>{
   });
 });
 
+/* render PPE steps */
+function renderPPESteps(productId, methodName){
+  const cfg = productConfig[productId];
+  const stepsBox = document.getElementById("ppeSteps");
+  stepsBox.innerHTML = "";
+  if (!cfg || !cfg.applicationSteps) return;
+  const steps = cfg.applicationSteps[methodName];
+  if (!steps) return;
+  const ol = document.createElement("ol");
+  steps.forEach(s=>{
+    const li=document.createElement("li");
+    li.textContent = s;
+    ol.appendChild(li);
+  });
+  stepsBox.appendChild(ol);
+  const note = document.createElement("p");
+  note.style.fontSize = ".65rem";
+  note.style.color = "#777";
+  note.textContent = "Check actual label for drill size, pressure, and re-treatment intervals.";
+  stepsBox.appendChild(note);
+}
+
+/* update product UI */
 function updateProductUI(){
   const product = document.getElementById("product").value;
   if (!product) return;
   const cfg = productConfig[product];
 
-  // USE text
+  // use text
   document.getElementById("useText").textContent = cfg.use || "See label.";
 
   // image
@@ -982,28 +1080,6 @@ function updateProductUI(){
   computeCurrentProduct();
 }
 
-/* PPE steps renderer */
-function renderPPESteps(productId, methodName){
-  const cfg = productConfig[productId];
-  const stepsBox = document.getElementById("ppeSteps");
-  stepsBox.innerHTML = "";
-  if (!cfg || !cfg.applicationSteps) return;
-  const steps = cfg.applicationSteps[methodName];
-  if (!steps) return;
-  const ol = document.createElement("ol");
-  steps.forEach(s=>{
-    const li=document.createElement("li");
-    li.textContent = s;
-    ol.appendChild(li);
-  });
-  stepsBox.appendChild(ol);
-  const note = document.createElement("p");
-  note.style.fontSize = ".65rem";
-  note.style.color = "#777";
-  note.textContent = "Confirm drill bit size, pressure, number of injection ports, and re-treatment intervals on the actual label you uploaded.";
-  stepsBox.appendChild(note);
-}
-
 /* cambistat calc */
 function calcCambistat(){
   const species = document.getElementById("species").value;
@@ -1011,12 +1087,16 @@ function calcCambistat(){
   const doseText = document.getElementById("doseText");
   const waterText = document.getElementById("waterText");
   const totalText = document.getElementById("totalText");
+  const galConvert = document.getElementById("galConvert");
+  const toolSuggest = document.getElementById("toolSuggest");
 
   if (isNaN(dbh) || dbh < 4 || dbh > 47) {
     showSection("results", true);
     doseText.textContent = "DBH must be between 4 and 47 in for Cambistat table.";
     waterText.textContent = "";
     totalText.textContent = "";
+    galConvert.innerHTML = "";
+    toolSuggest.innerHTML = "";
     return;
   }
 
@@ -1031,10 +1111,30 @@ function calcCambistat(){
 
   const row = cambistatData[dbh];
   const cell = row[category];
+  const totalMl = cell.product + cell.water;
   showSection("results", true);
   doseText.textContent = `Product: ${cell.product} mL Cambistat (Category ${category})`;
   waterText.textContent = `Water: ${cell.water} mL`;
-  totalText.textContent = `Total: ${cell.product + cell.water} mL`;
+  totalText.textContent = `Total: ${totalMl} mL`;
+  galConvert.innerHTML = `<strong>mL → gallons:</strong> ${(totalMl / ML_PER_GAL).toFixed(3)} gal`;
+  renderToolSuggestionForProduct("cambistat", totalMl);
+}
+
+/* suggest Rainbow EcoScience tool */
+function renderToolSuggestionForProduct(productId, totalMl){
+  const cfg = productConfig[productId];
+  const toolBox = document.getElementById("toolSuggest");
+  if (!cfg) { toolBox.innerHTML = ""; return; }
+  let html = "";
+  if (cfg.rainbowTool) {
+    html += `<strong>Suggested Rainbow tool:</strong> ${cfg.rainbowTool}`;
+  }
+  // if it's a macro-infusion type, show tank count
+  if (cfg.rainbowTool && cfg.rainbowTool.toLowerCase().includes("macro")) {
+    const tanks = Math.ceil(totalMl / MACRO_TANK_ML);
+    html += `<br>Macro-Infusion tanks (10 L): ${tanks} tank(s) for ${Math.round(totalMl)} mL total.`;
+  }
+  toolBox.innerHTML = html;
 }
 
 /* main calculator */
@@ -1046,21 +1146,23 @@ function computeCurrentProduct(){
   const doseText = document.getElementById("doseText");
   const waterText = document.getElementById("waterText");
   const totalText = document.getElementById("totalText");
+  const galConvert = document.getElementById("galConvert");
+  const toolSuggest = document.getElementById("toolSuggest");
   showSection("results", true);
 
-  // 1) Cambistat already done above
+  // Cambistat handled separately
   if (cfg.showCambistat) return;
 
-  // 2) Xytect 2F and Xytect 10 (soil/trunk)
+  /* Xytect 2F and Xytect 10 */
   if (product === "xytect2f" || product === "xytect10") {
     const dbh = parseFloat(document.getElementById("dbh").value || "0");
     const pestId = document.getElementById("pest").value;
     const method = document.getElementById("method").value;
-    const rateObj = (cfg.pests || [])[0];
-    const chosen = (cfg.pests || []).find(p=>p.id===pestId) || rateObj;
-    const mlPerIn = (chosen.rateFlOz || 0.15) * 29.5735;
+    const chosen = (cfg.pests || [])[0];
+    const p = (cfg.pests || []).find(x=>x.id===pestId) || chosen;
+    const mlPerIn = (p.rateFlOz || 0.15) * 29.5735;
     const productMl = mlPerIn * dbh;
-    let waterMl;
+    let waterMl = 0;
 
     if (method === "Soil injection") {
       const gals = Math.max(1, dbh * 1);
@@ -1069,18 +1171,21 @@ function computeCurrentProduct(){
     } else if (method === "Soil drench") {
       const gals = 2;
       waterMl = gallonsToMl(gals);
-      waterText.textContent = `Water: ${Math.round(waterMl)} mL (example 2 gal drench)`;
-    } else { // trunk injection case on xytect10
+      waterText.textContent = `Water: ${Math.round(waterMl)} mL (≈ ${gals} gal drench)`;
+    } else {
       waterMl = 0;
       waterText.textContent = `Water: per injection device / label.`;
     }
 
-    doseText.textContent = `Product: ${Math.round(productMl)} mL ${cfg.name} at ${(chosen.rateFlOz || 0.15)} fl oz/in × ${dbh} in`;
-    totalText.textContent = waterMl ? `Total: ${Math.round(productMl + waterMl)} mL` : `Total: ${Math.round(productMl)} mL (inject undiluted per label)`;
+    const totalMl = productMl + waterMl;
+    doseText.textContent = `Product: ${Math.round(productMl)} mL ${cfg.name} at ${(p.rateFlOz || 0.15)} fl oz/in × ${dbh} in`;
+    totalText.textContent = `Total: ${Math.round(totalMl)} mL`;
+    galConvert.innerHTML = `<strong>mL → gallons:</strong> ${(totalMl / ML_PER_GAL).toFixed(3)} gal`;
+    renderToolSuggestionForProduct(product, totalMl);
     return;
   }
 
-  // 3) Alamo and Reliant (mL/in × DBH, dilute L/in)
+  /* Alamo & Reliant (mL/in × DBH, dilute to 1 L/in) */
   if (product === "alamo" || product === "reliant") {
     const dbh = parseFloat(document.getElementById("dbh").value || "0");
     const pestId = document.getElementById("pest").value;
@@ -1088,31 +1193,43 @@ function computeCurrentProduct(){
     const p = (cfg.pests || []).find(x=>x.id===pestId) || chosen;
     const productMl = p.rateMlPerIn * dbh;
     const waterMl = p.waterLPerIn * dbh * 1000;
+    const totalMl = productMl + waterMl;
     doseText.textContent = `Product: ${Math.round(productMl)} mL ${cfg.name} (${p.rateMlPerIn} mL/in × ${dbh} in)`;
     waterText.textContent = `Water: up to ${Math.round(waterMl)} mL (≈ ${(waterMl/1000).toFixed(1)} L)`;
-    totalText.textContent = `Apply by flare-root injection per label.`;
+    totalText.textContent = `Total: ${Math.round(totalMl)} mL`;
+    galConvert.innerHTML = `<strong>mL → gallons:</strong> ${(totalMl / ML_PER_GAL).toFixed(3)} gal`;
+    renderToolSuggestionForProduct(product, totalMl);
     return;
   }
 
-  // 4) Transtect 70 (packets)
+  /* Transtect 70WSP */
   if (product === "transtect70") {
     const dbh = parseFloat(document.getElementById("dbh").value || "0");
     const method = document.getElementById("method").value;
     const packets = Math.ceil(dbh / 17);
-    doseText.textContent = `Product: ${packets} packet(s) Transtect 70 WSP for ${dbh} in DBH.`;
+    let waterMl;
     if (method === "Bark spray (label)") {
-      waterText.textContent = `Water: enough to wet bark (≈1–2 gal total).`;
-      totalText.textContent = `Spray to runoff.`;
+      waterText.textContent = `Water: enough to wet bark (≈1–2 gal).`;
+      const totalMl = gallonsToMl(2);
+      doseText.textContent = `Product: ${packets} packet(s) Transtect 70 WSP for ${dbh} in DBH.`;
+      totalText.textContent = `Total spray volume example: ${Math.round(totalMl)} mL`;
+      galConvert.innerHTML = `<strong>mL → gallons:</strong> ${(totalMl / ML_PER_GAL).toFixed(3)} gal`;
+      renderToolSuggestionForProduct(product, totalMl);
+      return;
     } else {
       const gals = Math.max(2, dbh * 0.25);
-      const waterMl = gallonsToMl(gals);
+      waterMl = gallonsToMl(gals);
+      const totalMl = waterMl; // packets are solids dissolved
+      doseText.textContent = `Product: ${packets} packet(s) Transtect 70 WSP for ${dbh} in DBH.`;
       waterText.textContent = `Water: ${Math.round(waterMl)} mL (≈ ${gals.toFixed(1)} gal)`;
-      totalText.textContent = `Apply around root zone / injection sites.`;
+      totalText.textContent = `Total: ${Math.round(totalMl)} mL solution`;
+      galConvert.innerHTML = `<strong>mL → gallons:</strong> ${(totalMl / ML_PER_GAL).toFixed(3)} gal`;
+      renderToolSuggestionForProduct(product, totalMl);
+      return;
     }
-    return;
   }
 
-  // 5) Injection-only products (Transtect Infusible, Lepitect Infusible, Mectinite)
+  /* Transtect Infusible, Lepitect, Mectinite (injection mL/in) */
   if (product === "transtectInfusible" || product === "lepitect" || product === "mectinite") {
     const dbh = parseFloat(document.getElementById("dbh").value || "0");
     let perIn;
@@ -1120,17 +1237,20 @@ function computeCurrentProduct(){
     if (product === "lepitect")           perIn = dbh < 12 ? 4 : (dbh < 24 ? 6 : 8);
     if (product === "mectinite")          perIn = dbh < 12 ? 4 : (dbh < 24 ? 8 : 10);
     const productMl = perIn * dbh;
+    const totalMl = productMl; // injection, minimal dilution
     doseText.textContent = `Product: ${Math.round(productMl)} mL ${cfg.name} (${perIn} mL/in × ${dbh} in).`;
-    waterText.textContent = `Water: per injection device / label (enough to deliver).`;
-    totalText.textContent = `Inject evenly around root flare.`;
+    waterText.textContent = `Water: per injection device / label.`;
+    totalText.textContent = `Total: ${Math.round(totalMl)} mL`;
+    galConvert.innerHTML = `<strong>mL → gallons:</strong> ${(totalMl / ML_PER_GAL).toFixed(3)} gal`;
+    renderToolSuggestionForProduct(product, totalMl);
     return;
   }
 
-  // 6) Trimtect
+  /* Trimtect */
   if (product === "trimtect") {
     const dbh = parseFloat(document.getElementById("dbh").value || "0");
     const method = document.getElementById("method").value;
-    const productMl = 3 * dbh; // placeholder
+    const productMl = 3 * dbh; // example
     let waterMl;
     if (method === "Soil injection") {
       const gals = Math.max(1.5, dbh * 0.25);
@@ -1139,66 +1259,77 @@ function computeCurrentProduct(){
     } else {
       const gals = 1.5;
       waterMl = gallonsToMl(gals);
-      waterText.textContent = `Water: ${Math.round(waterMl)} mL (example drench volume)`;
+      waterText.textContent = `Water: ${Math.round(waterMl)} mL (example drench)`;
     }
+    const totalMl = productMl + waterMl;
     doseText.textContent = `Product: ${Math.round(productMl)} mL Trimtect (3 mL/in × ${dbh} in)`;
-    totalText.textContent = `Total: ${Math.round(productMl + waterMl)} mL`;
+    totalText.textContent = `Total: ${Math.round(totalMl)} mL`;
+    galConvert.innerHTML = `<strong>mL → gallons:</strong> ${(totalMl / ML_PER_GAL).toFixed(3)} gal`;
+    renderToolSuggestionForProduct(product, totalMl);
     return;
   }
 
-  // 7) MoistureAide
+  /* MoistureAide */
   if (product === "moistureaide") {
     const dbh = parseFloat(document.getElementById("dbh").value || "0");
     const method = document.getElementById("method").value;
     const flOzPerIn = 6;
     const productMl = flOzPerIn * 29.5735 * dbh;
+    let waterMl;
     if (method === "Soil injection") {
       const gals = 5 * dbh;
-      const waterMl = gallonsToMl(gals);
-      doseText.textContent = `Product: ${Math.round(productMl)} mL MoistureAide (${flOzPerIn} fl oz/in × ${dbh} in).`;
+      waterMl = gallonsToMl(gals);
       waterText.textContent = `Water: ${Math.round(waterMl)} mL (≈ ${gals.toFixed(1)} gal)`;
-      totalText.textContent = `Total: ${Math.round(productMl + waterMl)} mL`;
     } else {
       const gals = 2;
-      const waterMl = gallonsToMl(gals);
-      doseText.textContent = `Product: ${Math.round(productMl)} mL MoistureAide.`;
-      waterText.textContent = `Water: ${Math.round(waterMl)} mL (example drench).`;
-      totalText.textContent = `Total: ${Math.round(productMl + waterMl)} mL`;
+      waterMl = gallonsToMl(gals);
+      waterText.textContent = `Water: ${Math.round(waterMl)} mL (example drench)`;
     }
+    const totalMl = productMl + waterMl;
+    doseText.textContent = `Product: ${Math.round(productMl)} mL MoistureAide.`;
+    totalText.textContent = `Total: ${Math.round(totalMl)} mL`;
+    galConvert.innerHTML = `<strong>mL → gallons:</strong> ${(totalMl / ML_PER_GAL).toFixed(3)} gal`;
+    renderToolSuggestionForProduct(product, totalMl);
     return;
   }
 
-  // 8) Spray-only products (most of the rest, including new ones)
+  /* Spray-only products (most of the rest) */
   if (cfg.showSpray && !cfg.showDBH && !cfg.showMethods) {
     const sprayGal = parseFloat(document.getElementById("sprayVol").value || "0");
     const pestId = document.getElementById("pest").value;
     const chosen = (cfg.pests || [])[0];
     const p = (cfg.pests || []).find(x=>x.id===pestId) || chosen;
+    const totalMlSpray = gallonsToMl(sprayGal);
 
-    // percent style (hortoil, onmark, upstargold)
+    // percent solution
     if (p && typeof p.percent === "number") {
-      const totalMl = gallonsToMl(sprayGal);
-      const productMl = totalMl * (p.percent/100);
+      const productMl = totalMlSpray * (p.percent/100);
       doseText.textContent = `Product: ${Math.round(productMl)} mL ${cfg.name} for ${sprayGal} gal at ${p.percent}%`;
       waterText.textContent = `Water: to ${sprayGal} gal total.`;
-      totalText.textContent = `Apply to full coverage.`;
+      totalText.textContent = `Total: ${Math.round(totalMlSpray)} mL`;
+      galConvert.innerHTML = `<strong>mL → gallons:</strong> ${(totalMlSpray / ML_PER_GAL).toFixed(3)} gal`;
+      renderToolSuggestionForProduct(product, totalMlSpray);
       return;
     }
 
-    // Biorush handled here? it has rateFlOzPer100 — fine.
+    // fl oz / 100 gal
     const rate = (p && p.rateFlOzPer100) ? p.rateFlOzPer100 : 8;
     const neededFlOz = rate * (sprayGal / 100);
     const productMl = neededFlOz * 29.5735;
     doseText.textContent = `Product: ${Math.round(productMl)} mL ${cfg.name} for ${sprayGal} gal at ${rate} fl oz/100 gal.`;
     waterText.textContent = `Water: to ${sprayGal} gal total spray.`;
-    totalText.textContent = `Apply with good coverage.`;
+    totalText.textContent = `Total: ${Math.round(totalMlSpray)} mL`;
+    galConvert.innerHTML = `<strong>mL → gallons:</strong> ${(totalMlSpray / ML_PER_GAL).toFixed(3)} gal`;
+    renderToolSuggestionForProduct(product, totalMlSpray);
     return;
   }
 
-  // 9) fallback
+  // fallback
   doseText.textContent = "Calculator for this product not fully defined here.";
   waterText.textContent = "";
   totalText.textContent = "";
+  galConvert.innerHTML = "";
+  toolSuggest.innerHTML = "";
 }
 
 /* live listeners */
