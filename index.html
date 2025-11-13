@@ -1125,7 +1125,7 @@ function updateProductUI(){
   // use text
   document.getElementById("useText").textContent = cfg.use || "See label.";
 
-  // image
+   // image
   const imgEl = document.getElementById("productImage");
   const imgSrc = productImages[product];
   if (imgSrc) {
@@ -1133,10 +1133,11 @@ function updateProductUI(){
     imgEl.style.display = "";
   } else {
     imgEl.style.display = "none";
-      // refresh stock line whenever product changes
+  }
+
+  // refresh stock line whenever product changes
   updateStockDisplayForCurrentProduct();
 
-  }
 
   // PPE
   document.getElementById("ppeText").textContent = cfg.ppe || "See label.";
