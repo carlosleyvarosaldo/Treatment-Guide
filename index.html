@@ -57,6 +57,9 @@
         </select>
       </div>
     </div>
+  <p id="stockLine" style="font-size:.8rem;color:#444;display:none;margin-top:-0.25rem;">
+  <strong>Stock:</strong> <span id="stockValue">–</span>
+</p>
 
     <div class="tabs" id="tabs" style="display:none">
       <button class="tab-btn active" data-tab="use">Use</button>
@@ -149,6 +152,127 @@
 /* ---------- CONFIG CONSTANTS ---------- */
 const MACRO_TANK_ML = 10000; // 10 L macro-infusion tank (adjust here)
 const ML_PER_GAL = 3785.41;
+/* ---------- GOOGLE SHEETS LIVE STOCK (FORM RESPONSES) ---------- */
+
+/*
+  HOW THIS WORKS:
+
+  - Your Google Form writes each inventory check as a new row.
+  - We fetch the published CSV.
+  - We take the LAST row as "current inventory".
+  - We map column names (sheet headers) → product IDs used in your calculator.
+*/
+
+const STOCK_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSjAXLRLMyVK2jt9GVueChjbnXf2e2PPikvHTCFAC4D-ucROydK_nFl8eh13lk1ZxqmCRGsmyzmzGoe/pub?gid=1081116602&single=true&output=csv";
+
+// map column names in the sheet → productId in your productConfig
+const sheetColumnToProductId = {
+  "Alamo": "alamo",
+  "Proxite": "proxite",
+  "Abamectin 0.15": "abamectin015",
+  "Diamid T&O": "diamid",
+  "Bifenimite 2SC": "bifenamite2sc",
+  "Mectinite": "mectinite",
+  "Xytect 10%": "xytect10",
+  "Transtect infusible": "transtectInfusible",
+  "Cambistat": "cambistat",
+  "Hort Oil": "hortoil",
+  "Xytect 2f": "xytect2f",
+  "Reliant": "reliant",
+  "Myclotect": "myclotect",
+  "MoistureAide": "moistureaide",
+  "Scrimmage": "scrimmage",          // updated spelling from sheet
+  "VerdurMn": "verdurmn",
+  "Bacastat": "bacastat",
+
+  // IMPORTANT: treat Lepitect and Lepitect infusible as different stock
+  // Column "Lepitect" = one stock bucket (soil / non-infusible).
+  // Column "Lepitect infusible" = a separate bucket that matches your Lepitect Infusible product.
+  "Lepitect": "lepitectSoil",        // separate stock bucket, even if not used in calculator yet
+  "Lepitect infusible": "lepitect",  // this matches your existing Lepitect Infusible product
+
+  "Sightline": "sightline",
+  "Bio Rush 3-0-11": "biorush",
+  "Up-Star Gold": "upstargold"
+  // You can add more mappings later (Nutri Root, Xytect G, etc.) if you add calculators for them.
+};
+
+// will be filled like: { cambistat: 3, xytect2f: 5, ... }
+let stockByProductId = {};
+
+/**
+ * Fetch the published CSV from Google Sheets and populate stockByProductId.
+ * This runs every time the page loads, so new Google Form responses are used automatically.
+ */
+function fetchStockFromSheet() {
+  if (!STOCK_CSV_URL) {
+    console.warn("STOCK_CSV_URL not configured.");
+    return;
+  }
+
+  fetch(STOCK_CSV_URL)
+    .then(resp => resp.text())
+    .then(csvText => {
+      stockByProductId = parseStockCSV_latestRow(csvText);
+      updateStockDisplayForCurrentProduct();
+    })
+    .catch(err => {
+      console.error("Error fetching stock CSV:", err);
+    });
+}
+
+/**
+ * Reads the CSV, grabs the LAST row, and builds stockByProductId.
+ * Uses your actual column names from the sheet header.
+ */
+function parseStockCSV_latestRow(csvText) {
+  const lines = csvText.trim().split(/\r?\n/);
+  if (lines.length < 2) return {};
+
+  const header = lines[0].split(",").map(h => h.trim());
+  const lastLine = lines[lines.length - 1];
+  const lastCols = lastLine.split(",");
+
+  const result = {};
+
+  for (let i = 0; i < header.length; i++) {
+    const colName = header[i];
+    const productId = sheetColumnToProductId[colName];
+    if (!productId) continue; // skip columns we don't map
+
+    const rawVal = (lastCols[i] || "").trim();
+    if (!rawVal) continue;
+
+    const num = parseFloat(rawVal);
+    result[productId] = isNaN(num) ? rawVal : num;
+  }
+
+  return result;
+}
+
+/**
+ * Show the stock line for the currently selected product, using stockByProductId.
+ */
+function updateStockDisplayForCurrentProduct() {
+  const product = document.getElementById("product").value;
+  const stockLine = document.getElementById("stockLine");
+  const stockValue = document.getElementById("stockValue");
+
+  if (!product) {
+    stockLine.style.display = "none";
+    return;
+  }
+
+  const raw = stockByProductId[product];
+
+  if (raw === undefined) {
+    stockLine.style.display = "";
+    stockValue.textContent = "not tracked";
+  } else {
+    stockLine.style.display = "";
+    stockValue.textContent = raw + " units";
+  }
+}
 
 /* 1. SEASON LIST (label-ish: injections/systemics in active seasons) */
 const seasonProducts = {
@@ -1009,6 +1133,9 @@ function updateProductUI(){
     imgEl.style.display = "";
   } else {
     imgEl.style.display = "none";
+      // refresh stock line whenever product changes
+  updateStockDisplayForCurrentProduct();
+
   }
 
   // PPE
@@ -1344,6 +1471,9 @@ document.getElementById("ppeMethod").addEventListener("change", ()=>{
   const method = document.getElementById("ppeMethod").value;
   renderPPESteps(product, method);
 });
+  // Load inventory from Google Sheets when the page opens
+fetchStockFromSheet();
+
 </script>
 </body>
 </html>
